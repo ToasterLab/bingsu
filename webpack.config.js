@@ -7,7 +7,7 @@ const electronConfiguration = {
   entry: './src/main.ts',
   target: 'electron-main',
   resolve: {
-    extensions: ['.ts'],
+    extensions: ['.ts', '.js'],
   },
   module: {
     rules: [{
