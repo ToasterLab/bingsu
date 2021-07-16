@@ -1,11 +1,16 @@
 import React from 'react'
-import DropZone from './components/DropZone'
+import TitleBar from './components/TitleBar'
+import DropZone from './components/DropZone/'
+import './app.scss'
 
 const App = () => {
 
   return (
     <div id="app-container">
-      <DropZone />
+      <TitleBar />
+      <div id="main-app">
+        <DropZone />
+      </div>
     </div>
   )
 }

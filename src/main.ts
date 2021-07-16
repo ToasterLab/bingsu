@@ -1,10 +1,15 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import isDev from 'electron-is-dev'
 
-function createWindow () {
-  const mainWindow = new BrowserWindow({
+let mainWindow
+
+const createWindow = () => {
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    frame: false,
+    backgroundColor: '#fff',
+    transparent: true,
     webPreferences: {
       nodeIntegration: true,
     }
@@ -24,6 +29,14 @@ const registerListeners = () => {
   ipcMain.on('message', (_, message) => {
     console.log(message)
   })
+
+  ipcMain.on(`minimise`, () => {
+    mainWindow.minimize()
+  })
+
+  ipcMain.on(`close`, () => {
+    mainWindow.close()
+  })
 }
 
 app.on(`ready`, createWindow)
@@ -35,5 +48,7 @@ app.on('activate', function () {
 })
 
 app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') app.quit()
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
 })

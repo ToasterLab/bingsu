@@ -6,6 +6,9 @@ module.exports = {
     `plugin:import/warnings`,
     `plugin:import/typescript`,
   ],
+  globals: {
+    bridgeApi: `readonly`
+  },
   parser: `@typescript-eslint/parser`,
   plugins: [
     `disable`,

@@ -1,5 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
+type channels = `minimize` | `close`
+
 export const api = {
   /**
    * Here you can expose functions to the renderer process
@@ -16,9 +18,11 @@ export const api = {
   /**
    * Provide an easier way to listen to events
    */
-  on: (channel: string, callback: Function) => {
+  on: (channel: channels, callback: Function) => {
     ipcRenderer.on(channel, (_, data) => callback(data))
   },
 }
 
-contextBridge.exposeInMainWorld('Main', api)
+export type bridgeApiType = typeof api
+
+contextBridge.exposeInMainWorld('bridgeApi', api)

@@ -1,6 +1,8 @@
 import React from 'react'
 import { useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
+import { FiUpload } from 'react-icons/fi'
+import './DropZone.scss'
 
 const DropZone = () => {
 
@@ -20,11 +22,16 @@ const DropZone = () => {
   return (
     <div id="dropzone" {...getRootProps()}>
       <input {...getInputProps()} />
+      <div id="icon">
+        <FiUpload size="100" />
+      </div>
+      <div id="text">
       {
         isDragActive
-          ? <span>Drop the file here</span>
-          : <span>Drag and drop a single DOCX file here or click here to select one</span>
-      }
+          ? <span>drop the file here</span>
+          : <span>drag-and-drop a single docx file<br />or click here to select one</span>
+        }
+      </div>
     </div>
   )
 }

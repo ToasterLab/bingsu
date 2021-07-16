@@ -11,3 +11,5 @@ Bingsu helps you prevent linkrot in your documents.
 npm run start:dev
 
 ```
+
+<kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>I</kbd> to open developer tools.
