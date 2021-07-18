@@ -22,15 +22,32 @@ const electronConfiguration = {
   },
 }
 
+const preloadConfiguration = {
+  mode: `development`,
+  entry: `./src/electron/preload.ts`,
+  target: `electron-preload`,
+  resolve: {
+    extensions: [`.ts`, `.js`],
+  },
+  module: {
+    rules: [{
+      test: /\.ts$/,
+      include: /src/,
+      use: [{ loader: 'ts-loader' }]
+    }]
+  },
+  output: {
+    path: __dirname + '/dist',
+    filename: 'preload.js'
+  },
+}
+
 const reactConfiguration = {
   mode: 'development',
   entry: './src/renderer.tsx',
   target: 'electron-renderer',
   devtool: 'source-map',
   resolve: {
-    alias: {
-      ['@']: path.resolve(__dirname, 'src')
-    },
     extensions: ['.tsx', '.ts', '.js'],
   },
   module: {
@@ -67,5 +84,6 @@ const reactConfiguration = {
 }
 module.exports = [
   electronConfiguration,
+  preloadConfiguration,
   reactConfiguration
 ]

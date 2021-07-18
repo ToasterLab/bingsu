@@ -26,23 +26,11 @@
     ]
   },
   "dependencies": {
-    "@electron-forge/plugin-webpack": "^6.0.0-beta.57",
     "adm-zip": "^0.5.5",
-    "copy-webpack-plugin": "^9.0.1",
-    "css-loader": "^5.2.7",
-    "fastify": "^3.18.1",
-    "html-webpack-plugin": "^5.3.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.3.4",
-    "react-hot-loader": "^4.13.0",
     "react-icons": "^4.2.0",
-    "sass": "^1.35.2",
-    "sass-loader": "^12.1.0",
-    "style-loader": "^3.1.0",
-    "ts-loader": "^9.2.3",
-    "webpack": "^5.44.0",
-    "webpack-cli": "^4.7.2",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
@@ -57,6 +45,8 @@
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.28.1",
     "concurrently": "^6.2.0",
+    "copy-webpack-plugin": "^9.0.1",
+    "css-loader": "^6.1.0",
     "dotenv": "^10.0.0",
     "electron": "^13.1.6",
     "electron-is-dev": "^2.0.0",
@@ -66,10 +56,18 @@
     "eslint-plugin-sonarjs": "^0.8.0-125",
     "eslint-plugin-sort-keys-fix": "^1.1.1",
     "eslint-plugin-unicorn": "^34.0.1",
+    "html-webpack-plugin": "^5.3.2",
     "husky": "^7.0.0",
     "lint-staged": "^11.0.0",
     "nodemon": "^2.0.12",
+    "react-hot-loader": "^4.13.0",
+    "sass": "^1.35.2",
+    "sass-loader": "^12.1.0",
+    "style-loader": "^3.1.0",
+    "ts-loader": "^9.2.3",
     "typescript": "^4.3.5",
+    "webpack": "^5.45.1",
+    "webpack-cli": "^4.7.2",
     "webpack-dev-server": "^3.11.2"
   },
   "engines": {
@@ -77,56 +75,5 @@
   },
   "os": [
     "linux"
-  ],
-  "config": {
-    "forge": {
-      "packagerConfig": {
-        "name": "Bingsu",
-        "executableName": "bingsu",
-        "icon": "assets/icon",
-        "extraResource": [
-          "assets"
-        ]
-      },
-      "plugins": [
-        [
-          "@electron-forge/plugin-webpack",
-          {
-            "mainConfig": "./webpack/main.webpack.js",
-            "renderer": {
-              "config": "./webpack/renderer.webpack.js",
-              "entryPoints": [
-                {
-                  "html": "./public/index.html",
-                  "js": "./src/index.tsx",
-                  "name": "main_window",
-                  "preload": {
-                    "js": "./electron/bridge.ts"
-                  }
-                }
-              ]
-            }
-          }
-        ]
-      ],
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "Bingsu"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        }
-      ]
-    }
-  }
+  ]
 }

@@ -2,7 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 
 type channels = `minimize` | `close`
 
-export const api = {
+const api = {
   /**
    * Here you can expose functions to the renderer process
    * so they can interact with the main (electron) side
@@ -25,4 +25,4 @@ export const api = {
 
 export type bridgeApiType = typeof api
 
-contextBridge.exposeInMainWorld('bridgeApi', api)
+export default api

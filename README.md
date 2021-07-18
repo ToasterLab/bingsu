@@ -12,4 +12,10 @@ npm run start:dev
 
 ```
 
+### Debugging the web pages
+
 <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>I</kbd> to open developer tools.
+
+### Debugging the main process
+
+Electron is configured to listen for V8 inspector protocol messages on port `8080`. You can use the debugger built into Chrome. Visit `chrome://inspect`, click on the Connection tab, add a connection to `localhost:8080`, and look at the console logs.

@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import isDev from 'electron-is-dev'
+import Logger from './utils/Logger'
 
 let mainWindow
 
@@ -9,9 +10,10 @@ const createWindow = () => {
     height: 600,
     frame: false,
     backgroundColor: '#fff',
-    transparent: true,
+    // transparent: true,
     webPreferences: {
       nodeIntegration: true,
+      preload: `${app.getAppPath()}/preload.js`,
     }
   })
 
@@ -26,16 +28,23 @@ const createWindow = () => {
 }
 
 const registerListeners = () => {
+  Logger.log(`registerListeners`)
+
   ipcMain.on('message', (_, message) => {
-    console.log(message)
-  })
+    switch (message) {
+      case `minimise`: {
+        mainWindow.minimize()
+        break
+      }
+        
+      case `close`: {
+        mainWindow.close()
+        break
+      }
 
-  ipcMain.on(`minimise`, () => {
-    mainWindow.minimize()
-  })
-
-  ipcMain.on(`close`, () => {
-    mainWindow.close()
+      default:
+        Logger.log(`ipcMain message`, message)
+    }
   })
 }
 

@@ -8,12 +8,8 @@ declare var bridgeApi: bridgeApiType
 
 const TitleBar = () => {
 
-  const onMinimise = useCallback(() => {
-    bridgeApi.sendMessage(`minimize`)
-  }, [])
-  const onClose = useCallback(() => {
-    bridgeApi.sendMessage(`close`)
-  }, [])
+  const onMinimise = useCallback(() => bridgeApi.sendMessage(`minimise`), [])
+  const onClose = useCallback(() => bridgeApi.sendMessage(`close`), [])
 
   return (
     <header id="title-bar">

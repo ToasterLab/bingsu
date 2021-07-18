@@ -3,6 +3,6 @@
     "src/main.ts",
     "src/app/*"
   ],
-  "exec": "webpack && electron ./dist/main.js",
+  "exec": "webpack && electron --inspect=8080 ./dist/main.js",
   "ext": "ts"
 }
