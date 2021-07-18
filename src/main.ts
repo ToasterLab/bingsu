@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import isDev from 'electron-is-dev'
 import Logger from './utils/Logger'
 
-let mainWindow
+let mainWindow: BrowserWindow
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
