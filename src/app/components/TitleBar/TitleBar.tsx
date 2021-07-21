@@ -1,13 +1,10 @@
 import React from 'react'
 import { useCallback } from 'react'
 import { FiMinus, FiX } from 'react-icons/fi'
-import type { bridgeApiType } from '../../../electron/bridge'
 import './TitleBar.scss'
-
-declare var bridgeApi: bridgeApiType
+import { bridgeApi } from '../../../types/bingsu'
 
 const TitleBar = () => {
-
   const onMinimise = useCallback(() => bridgeApi.sendMessage(`minimise`), [])
   const onClose = useCallback(() => bridgeApi.sendMessage(`close`), [])
 

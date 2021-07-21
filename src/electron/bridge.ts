@@ -1,6 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
-
-type channels = `minimize` | `close`
+import { ipcRenderer } from 'electron'
 
 const api = {
   /**
@@ -11,18 +9,16 @@ const api = {
    * The function below can accessed using `window.Main.sayHello`
    */
 
-  sendMessage: (message: string) => { 
+  sendMessage: (message: MessageType, data?: Record<string, unknown>) => { 
     ipcRenderer.send('message', message)
   },
 
   /**
    * Provide an easier way to listen to events
    */
-  on: (channel: channels, callback: Function) => {
-    ipcRenderer.on(channel, (_, data) => callback(data))
+  on: (channel: MessageType, callback: Function) => {
+    ipcRenderer.on(channel, (event, data: Record<string, unknown>) => callback(data))
   },
 }
-
-export type bridgeApiType = typeof api
 
 export default api

@@ -1,20 +1,26 @@
 import React from 'react'
 import { useCallback } from 'react'
-import { useDropzone } from 'react-dropzone'
+import { DropzoneOptions, useDropzone } from 'react-dropzone'
 import { FiUpload } from 'react-icons/fi'
 import './DropZone.scss'
 
-const DropZone = () => {
+interface Props {
+  onDrop: DropzoneOptions[`onDrop`]
+}
 
-  const onDrop = useCallback((acceptedFiles, fileRejections) => {
+const DropZone: React.FC<Props> = ({
+  onDrop,
+}) => {
+
+  const internalOnDrop:DropzoneOptions[`onDrop`]  = useCallback((acceptedFiles, fileRejections, event) => {
     if (fileRejections.length > 0) {
       return window.alert(`Oops, invalid selection. Please select only 1 DOCX file`)
     }
-    console.log(acceptedFiles)
+    onDrop(acceptedFiles, fileRejections, event)
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
+    onDrop: internalOnDrop,
     maxFiles: 1,
     accept: `application/vnd.openxmlformats-officedocument.wordprocessingml.document`,
   })

@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import isDev from 'electron-is-dev'
+import Controller from './controller'
 import Logger from './utils/Logger'
 
 let mainWindow: BrowserWindow
@@ -30,21 +31,8 @@ const createWindow = () => {
 const registerListeners = () => {
   Logger.log(`registerListeners`)
 
-  ipcMain.on('message', (_, message) => {
-    switch (message) {
-      case `minimise`: {
-        mainWindow.minimize()
-        break
-      }
-        
-      case `close`: {
-        mainWindow.close()
-        break
-      }
-
-      default:
-        Logger.log(`ipcMain message`, message)
-    }
+  ipcMain.on('message', (event, message: MessageType, data: Record<string, unknown>) => {
+    Controller.handle(mainWindow, event, message, data)
   })
 }
 
