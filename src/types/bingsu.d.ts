@@ -1,6 +1,8 @@
 type MessageType = `message` | `toggle-maximise` | `minimise` | `close` | `handleFile`
 
-declare const bridgeApi: {
+interface BridgeApi {
   sendMessage: (message: MessageType, data?: Record<string, unknown>) => void,
   on: (channel: MessageType, callback: Function) => void,
 }
+
+declare const bridgeApi: BridgeApi
