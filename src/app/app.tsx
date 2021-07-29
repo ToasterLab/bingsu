@@ -1,19 +1,20 @@
-import React from 'react'
+import React, { useCallback, useEffect } from 'react'
 import TitleBar from './components/TitleBar'
 import DropZone from './components/DropZone/'
 import './app.scss'
-import { useCallback } from 'react'
-import { useEffect } from 'react'
+import { MessageType } from '../utils/Constants'
+import Logger from '../utils/Logger'
 
 const App = () => {
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0]
-    bridgeApi.sendMessage(`handleFile`, { file })
+    Logger.log(`onDrop`, file)
+    bridgeApi.sendMessage(MessageType.HANDLE_FILE, { filePath: file.path })
   }, [])
 
   useEffect(() => {
-    bridgeApi.on(`handleFile`, (data: Record<string, unknown>) => {
+    bridgeApi.on(MessageType.HANDLE_FILE, (data: Record<string, unknown>) => {
       console.log(`renderer`, data)
     })
   }, [])

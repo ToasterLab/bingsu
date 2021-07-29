@@ -12,29 +12,35 @@ interface DOCXFile {
 }
 
 const readFile = async (filePath: string): Promise<DOCXFile> => {
-  const ext = path.extname(filePath)
-  if (ext !== `.docx`) {
+  const extension = path.extname(filePath)
+  if (extension !== `.docx`) {
     throw new Error(`readFile only supports .docx files`)
   }
 
-  const dirName = path.dirname(filePath)
-  const tempName = crypto.randomBytes(10).toString(`hex`)
-  const tempPath = path.join(dirName, `${tempName}.docx`)
+  const directoryName = path.dirname(filePath)
+  const temporaryName = crypto.randomBytes(10).toString(`hex`)
+  const temporaryPath = path.join(directoryName, `${temporaryName}.docx`)
 
-  await fs.promises.rename(filePath, tempPath)
+  await fs.promises.rename(filePath, temporaryPath)
 
   try {
 
-    const zipFile = new unzip(tempPath)
+    const zipFile = new unzip(temporaryPath)
 
     return {
       filePath,
-      tempPath,
+      tempPath: temporaryPath,
       zipFile,
     }
   } catch (error) {
     Logger.log(error)
   }
+}
+
+const closeFile = async (DOCXFile: DOCXFile): Promise<void> => {
+  const { tempPath, zipFile, filePath } = DOCXFile
+  await fs.promises.unlink(tempPath)
+  await zipFile.writeZip(filePath)
 }
 
 interface getAllHyperlinksOptions {
@@ -55,7 +61,7 @@ const footnotesLinksFile = `word/_rels/footnotes.xml.rels` as const
 
 const getAllHyperlinks = async (
   DOCXFile: DOCXFile,
-  { document, footnotes = true } = {} as getAllHyperlinksOptions
+  { document, footnotes = true } = {} as getAllHyperlinksOptions,
 ): Promise<Hyperlink[]> => {
   const { zipFile } = DOCXFile
   const zipEntries = zipFile.getEntries()
@@ -65,19 +71,20 @@ const getAllHyperlinks = async (
     (footnotes && entryName === footnotesLinksFile)
   ))
 
-  let hyperlinks: Hyperlink[] = []
+  const hyperlinks: Hyperlink[] = []
   for (const file of files) {
     const fileContents = zipFile.readAsText(file)
-    const links: Hyperlink[] = (await xml2js.parseStringPromise(fileContents))[`Relationships`].map(
+    const xmlContent = await xml2js.parseStringPromise(fileContents)
+    const links: Hyperlink[] = xmlContent[`Relationships`][`Relationship`].map(
       (relationship): Hyperlink | null => {
         const targetMode = relationship[`$`][`TargetMode`]
         if (targetMode === `External`) {
           const id = relationship[`$`][`Id`]
           const url = relationship[`$`][`Target`]
           return {
-            location: file.entryName === documentLinksFile ? `document` : `footnotes`,
             id,
-            url
+            location: file.entryName === documentLinksFile ? `document` : `footnotes`,
+            url,
           }
         }
         return null
@@ -89,9 +96,10 @@ const getAllHyperlinks = async (
   return hyperlinks
 }
 
-const DocConvert = {
-  readFile,
+const DocumentConvert = {
+  closeFile,
   getAllHyperlinks,
+  readFile,
 }
 
-export default DocConvert
+export default DocumentConvert

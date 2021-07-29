@@ -7,19 +7,20 @@ let mainWindow: BrowserWindow
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    backgroundColor: `#fff`,
     frame: false,
-    backgroundColor: '#fff',
+    height: 600,
     // transparent: true,
-    webPreferences: {
+webPreferences: {
       nodeIntegration: true,
       preload: `${app.getAppPath()}/preload.js`,
-    }
+    },
+    
+    width: 800,
   })
 
   const url = isDev
-    ? 'http://localhost:9000'
+    ? `http://localhost:9000`
     : `file://${app.getAppPath()}/index.html`
 
   mainWindow.loadURL(url)
@@ -31,7 +32,7 @@ const createWindow = () => {
 const registerListeners = () => {
   Logger.log(`registerListeners`)
 
-  ipcMain.on('message', (event, message: MessageType, data: Record<string, unknown>) => {
+  ipcMain.on(`message`, (event, message: MessageType, data: Record<string, unknown>) => {
     Controller.handle(mainWindow, event, message, data)
   })
 }
@@ -40,12 +41,12 @@ app.on(`ready`, createWindow)
   .whenReady()
   .then(registerListeners)
 
-app.on('activate', function () {
+app.on(`activate`, function () {
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') {
+app.on(`window-all-closed`, function () {
+  if (process.platform !== `darwin`) {
     app.quit()
   }
 })

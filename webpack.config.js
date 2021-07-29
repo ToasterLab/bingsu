@@ -1,89 +1,88 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
-const path = require('path');
+const HtmlWebpackPlugin = require(`html-webpack-plugin`)
+const path = require(`path`)
 
 const electronConfiguration = {
-  mode: 'development',
-  entry: './src/main.ts',
-  target: 'electron-main',
-  resolve: {
-    extensions: ['.ts', '.js'],
-  },
+  entry: `./src/main.ts`,
+  mode: `development`,
   module: {
     rules: [{
-      test: /\.ts$/,
       include: /src/,
-      use: [{ loader: 'ts-loader' }]
-    }]
+      test: /\.ts$/,
+      use: [{ loader: `ts-loader` }],
+    }],
   },
   output: {
-    path: __dirname + '/dist',
-    filename: 'main.js'
+    filename: `main.js`,
+    path: __dirname + `/dist`,
   },
-}
-
-const preloadConfiguration = {
-  mode: `development`,
-  entry: `./src/electron/preload.ts`,
-  target: `electron-preload`,
   resolve: {
     extensions: [`.ts`, `.js`],
   },
+  target: `electron-main`,
+}
+
+const preloadConfiguration = {
+  entry: `./src/electron/preload.ts`,
+  mode: `development`,
   module: {
     rules: [{
-      test: /\.ts$/,
       include: /src/,
-      use: [{ loader: 'ts-loader' }]
-    }]
+      test: /\.ts$/,
+      use: [{ loader: `ts-loader` }],
+    }],
   },
   output: {
-    path: __dirname + '/dist',
-    filename: 'preload.js'
+    filename: `preload.js`,
+    path: __dirname + `/dist`,
   },
+  resolve: {
+    extensions: [`.ts`, `.js`],
+  },
+  target: `electron-preload`,
 }
 
 const reactConfiguration = {
-  mode: 'development',
-  entry: './src/renderer.tsx',
-  target: 'electron-renderer',
-  devtool: 'source-map',
-  resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+  devServer: {
+    compress: true,
+    contentBase: path.join(__dirname, `dist/renderer.js`),
+    port: 9000,
   },
+  devtool: `source-map`,
+  entry: `./src/renderer.tsx`,
+  mode: `development`,
   module: {
     rules: [
       {
-        test: /\.ts(x?)$/,
         include: /src/,
-        use: [{ loader: 'ts-loader' }]
+        test: /\.ts(x?)$/,
+        use: [{ loader: `ts-loader` }],
       },
       {
         test: /\.s[ac]ss$/i,
         use: [
-          'style-loader',
-          'css-loader',
-          'sass-loader',
+          `style-loader`,
+          `css-loader`,
+          `sass-loader`,
         ],
-      }
-    ]
+      },
+    ],
   },
   output: {
-    path: __dirname + '/dist',
-    filename: 'renderer.js'
+    filename: `renderer.js`,
+    path: __dirname + `/dist`,
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/index.html'
-    })
+      template: `./src/index.html`,
+    }),
   ],
-  devServer: {
-    contentBase: path.join(__dirname, 'dist/renderer.js'),
-    compress: true,
-    port: 9000
+  resolve: {
+    extensions: [`.tsx`, `.ts`, `.js`],
   },
+  target: `electron-renderer`,
 }
 module.exports = [
   electronConfiguration,
   preloadConfiguration,
-  reactConfiguration
+  reactConfiguration,
 ]

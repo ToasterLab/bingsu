@@ -1,7 +1,10 @@
 {
   "watch": [
     "src/main.ts",
-    "src/app/*"
+    "src/app/*",
+    "src/controller/*",
+    "src/electron/*",
+    "src/utils/*"
   ],
   "exec": "webpack && electron --inspect=8080 ./dist/main.js",
   "ext": "ts"

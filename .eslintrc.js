@@ -7,11 +7,10 @@ module.exports = {
     `plugin:import/typescript`,
   ],
   globals: {
-    bridgeApi: `readonly`
+    bridgeApi: `readonly`,
   },
   parser: `@typescript-eslint/parser`,
   plugins: [
-    `disable`,
     `@typescript-eslint`,
     `sonarjs`,
     `sort-keys-fix`,

@@ -1,11 +1,11 @@
-import React from 'react'
-import { useCallback } from 'react'
+import React, { useCallback } from 'react'
 import { FiMinus, FiX } from 'react-icons/fi'
+import { MessageType } from '../../../utils/Constants'
 import './TitleBar.scss'
 
 const TitleBar = () => {
-  const onMinimise = useCallback(() => bridgeApi.sendMessage(`minimise`), [])
-  const onClose = useCallback(() => bridgeApi.sendMessage(`close`), [])
+  const onMinimise = useCallback(() => bridgeApi.sendMessage(MessageType.MINIMISE), [])
+  const onClose = useCallback(() => bridgeApi.sendMessage(MessageType.CLOSE), [])
 
   return (
     <header id="title-bar">

@@ -1,25 +1,28 @@
 import type { BrowserWindow } from "electron"
 import Logger from '../utils/Logger'
 import DOCX from '../utils/DOCX'
+import { MessageType } from '../utils/Constants'
+
+// handles ipc messages from renderer received by Electron backend
 
 const handle = async (
   mainWindow: BrowserWindow,
   event: Electron.IpcMainEvent,
   message: MessageType,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ) => {
   switch (message) {
-    case `minimise`: {
+    case MessageType.MINIMISE: {
       mainWindow.minimize()
       break
     }
       
-    case `close`: {
+    case MessageType.CLOSE: {
       mainWindow.close()
       break
     }
 
-    case `toggle-maximise`: {
+    case MessageType.TOGGLE_MAXIMISE: {
       if(mainWindow.isMaximized()){
         mainWindow.unmaximize()
       } else {
@@ -27,11 +30,20 @@ const handle = async (
       }
     }
 
-    case `handleFile`: {
-      const { file }: { file?: File } = data
-      const docxFile = await DOCX.readFile(file.path)
-      const links = await DOCX.getAllHyperlinks(docxFile)
-      event.reply(`handleFile`, { links })
+    case MessageType.HANDLE_FILE: {
+      Logger.log(`Controller`, data)
+      if (data && `filePath` in data) {
+        const { filePath } = data
+        const docxFile = await DOCX.readFile(filePath as File[`path`])
+        try {
+          const links = await DOCX.getAllHyperlinks(docxFile)
+          event.reply(MessageType.HANDLE_FILE, { links })
+        } catch (error) {
+          Logger.error(`Controller handleFile`, error)
+        } finally {
+          await DOCX.closeFile(docxFile)
+        }
+      }
       break
     }
 
@@ -42,7 +54,7 @@ const handle = async (
 }
 
 const Controller = {
-  handle
+  handle,
 }
 
 export default Controller
