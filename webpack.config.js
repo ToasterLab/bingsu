@@ -77,7 +77,7 @@ const reactConfiguration = {
     }),
   ],
   resolve: {
-    extensions: [`.tsx`, `.ts`, `.js`],
+    extensions: [`.tsx`, `.ts`, `.js`, `.jsx`],
   },
   target: `electron-renderer`,
 }

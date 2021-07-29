@@ -37,7 +37,7 @@ const handle = async (
         const docxFile = await DOCX.readFile(filePath as File[`path`])
         try {
           const links = await DOCX.getAllHyperlinks(docxFile)
-          event.reply(MessageType.HANDLE_FILE, { links })
+          event.reply(MessageType.HANDLE_FILE, { file: docxFile, hyperlinks: links })
         } catch (error) {
           Logger.error(`Controller handleFile`, error)
         } finally {

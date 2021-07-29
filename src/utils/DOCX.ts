@@ -5,12 +5,6 @@ import xml2js from 'xml2js'
 import crypto from 'crypto'
 import Logger from './Logger'
 
-interface DOCXFile {
-  filePath: string,
-  tempPath: string,
-  zipFile: unzip
-}
-
 const readFile = async (filePath: string): Promise<DOCXFile> => {
   const extension = path.extname(filePath)
   if (extension !== `.docx`) {
@@ -46,14 +40,6 @@ const closeFile = async (DOCXFile: DOCXFile): Promise<void> => {
 interface getAllHyperlinksOptions {
   document: true,
   footnotes: true
-}
-
-type HyperlinkLocation = `document` | `footnotes`
-
-interface Hyperlink {
-  id: string,
-  url: string,
-  location: HyperlinkLocation,
 }
 
 const documentLinksFile = `word/_rels.document.xml.rels` as const

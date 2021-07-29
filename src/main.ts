@@ -30,8 +30,6 @@ webPreferences: {
 }
 
 const registerListeners = () => {
-  Logger.log(`registerListeners`)
-
   ipcMain.on(`message`, (event, message: MessageType, data: Record<string, unknown>) => {
     Controller.handle(mainWindow, event, message, data)
   })

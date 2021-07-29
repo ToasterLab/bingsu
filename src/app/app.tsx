@@ -1,29 +1,35 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useEffect } from 'react'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
 import TitleBar from './components/TitleBar'
-import DropZone from './components/DropZone/'
+
+import InputPage from './pages/Input'
+import ProcessConfirmationPage from './pages/ProcessConfirmation'
+
 import './app.scss'
-import { MessageType } from '../utils/Constants'
-import Logger from '../utils/Logger'
+import Storage from '../utils/Storage'
 
 const App = () => {
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0]
-    Logger.log(`onDrop`, file)
-    bridgeApi.sendMessage(MessageType.HANDLE_FILE, { filePath: file.path })
-  }, [])
-
   useEffect(() => {
-    bridgeApi.on(MessageType.HANDLE_FILE, (data: Record<string, unknown>) => {
-      console.log(`renderer`, data)
-    })
+    (async () => {
+      await Storage.init()
+    })()
   }, [])
 
   return (
     <div id="app-container">
       <TitleBar />
       <div id="main-app">
-        <DropZone onDrop={onDrop} />
+        <Router>
+          <Switch>
+            <Route path="/" >
+              <InputPage />
+            </Route>
+            <Route exact path="/process-confirmation">
+              <ProcessConfirmationPage />
+            </Route>
+          </Switch>
+        </Router>
       </div>
     </div>
   )

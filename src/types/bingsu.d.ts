@@ -6,3 +6,17 @@ interface BridgeApi {
 }
 
 declare const bridgeApi: BridgeApi
+
+interface DOCXFile {
+  filePath: string,
+  tempPath: string,
+  zipFile: unzip
+}
+
+type HyperlinkLocation = `document` | `footnotes`
+
+interface Hyperlink {
+  id: string,
+  url: string,
+  location: HyperlinkLocation,
+}

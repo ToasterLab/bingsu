@@ -70,7 +70,7 @@ module.exports = {
   },
   settings: {
     node: {
-      tryExtensions: [`.tsx`], // append tsx to the list as well
+      tryExtensions: [`.js`, `.ts`, `.tsx`],
     },
   },
 }

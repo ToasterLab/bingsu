@@ -33,10 +33,4 @@ body {
   align-items: center;
   color: var(--text-colour);
   background-color: var(--app-colour); 
-
-  > #dropzone {
-    width: 80%;
-    min-height: 200px;
-    height: 50vh;
-  }
 }
