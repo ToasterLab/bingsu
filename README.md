@@ -19,3 +19,9 @@ npm run start:dev
 ### Debugging the main process
 
 Electron is configured to listen for V8 inspector protocol messages on port `8080`. You can use the debugger built into Chrome. Visit `chrome://inspect`, click on the Connection tab, add a connection to `localhost:8080`, and look at the console logs.
+
+### WSL
+
+If you're running Bingsu in WSL, [`VcXsrv`](https://github.com/ArcticaProject/vcxsrv) seems to be the X server that works best.
+
+There is an issue with window controls on [MobaXterm](https://mobaxterm.mobatek.net/).

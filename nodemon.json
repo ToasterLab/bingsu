@@ -1,7 +1,6 @@
 {
   "watch": [
     "src/main.ts",
-    "src/app/*",
     "src/controller/*",
     "src/electron/*",
     "src/utils/*"

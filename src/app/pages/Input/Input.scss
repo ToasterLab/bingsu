@@ -1,5 +1,13 @@
-#dropzone {
-  width: 80%;
-  min-height: 200px;
-  height: 50vh;
+#input-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: inherit;
+
+  > #dropzone {
+    width: 80%;
+    min-height: 200px;
+    height: 50vh;
+  }
 }
+

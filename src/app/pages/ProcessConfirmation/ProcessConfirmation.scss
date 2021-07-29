@@ -1,0 +1,59 @@
+#process-confirmation-page {
+  --action-bar-height: 32px;
+
+  > .file-results {
+    padding: 2rem;
+    height: calc(100vh - var(--title-bar-height) - var(--action-bar-height));
+    overflow-y: auto;
+    
+
+    .file-info {
+      margin-bottom: 2rem;
+    }
+
+    .links-list {
+      > p {
+        margin-bottom: 1rem;
+      }
+      > table {
+
+        >thead,tbody{
+          >tr {
+            >td {
+              padding: 0.2rem;
+            }
+          }
+        }
+
+        > thead {
+          font-weight: bold;
+        }
+      }
+    }
+  }
+
+  .action-bar {
+    background-color: var(--app-colour-dark);
+    height: var(--action-bar-height);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid black;
+
+    > a {
+      background-color: var(--app-colour-dark);
+      font-size: var(--font-size-normal);
+      align-self: stretch;
+      flex-grow: 1;
+      justify-self: stretch;
+      cursor: pointer;
+      font-weight: bold;
+      color: var(--text-colour);
+      text-decoration: none;
+      
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}

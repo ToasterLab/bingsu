@@ -1,36 +1,46 @@
 import React, { useEffect } from 'react'
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import { HashRouter as Router, Route, Switch } from 'react-router-dom'
 import TitleBar from './components/TitleBar'
 
 import InputPage from './pages/Input'
 import ProcessConfirmationPage from './pages/ProcessConfirmation'
+import Archiving from './pages/Archiving'
 
 import './app.scss'
-import Storage from '../utils/Storage'
+import { MessageType } from '../utils/Constants'
 
 const App = () => {
 
+  const [showTitleBar, setShowTitleBar] = React.useState(true)
+
   useEffect(() => {
-    (async () => {
-      await Storage.init()
-    })()
+    bridgeApi.sendMessage(MessageType.OS)
+    bridgeApi.on(MessageType.OS, (data: Record<`os`, OS>) => {
+      const { os } = data
+      if (os === `WSL`) {
+        setShowTitleBar(false)
+      }
+    })
   }, [])
 
   return (
     <div id="app-container">
-      <TitleBar />
-      <div id="main-app">
-        <Router>
+      {showTitleBar ? <TitleBar /> : null}
+      <Router>
+        <div id="main-app">
           <Switch>
-            <Route path="/" >
+            <Route exact path="/" >
               <InputPage />
             </Route>
             <Route exact path="/process-confirmation">
               <ProcessConfirmationPage />
             </Route>
-          </Switch>
-        </Router>
-      </div>
+            <Route exact path="/archiving">
+              <Archiving />
+            </Route>
+        </Switch>
+        </div>
+      </Router>
     </div>
   )
 }

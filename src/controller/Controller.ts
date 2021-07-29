@@ -2,6 +2,7 @@ import type { BrowserWindow } from "electron"
 import Logger from '../utils/Logger'
 import DOCX from '../utils/DOCX'
 import { MessageType } from '../utils/Constants'
+import { getOS } from '../utils/System'
 
 // handles ipc messages from renderer received by Electron backend
 
@@ -44,6 +45,11 @@ const handle = async (
           await DOCX.closeFile(docxFile)
         }
       }
+      break
+    }
+
+    case MessageType.OS: {
+      event.reply(MessageType.OS, { os: getOS() })
       break
     }
 

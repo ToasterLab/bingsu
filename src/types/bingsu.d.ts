@@ -1,4 +1,6 @@
-type MessageType = `message` | `toggle-maximise` | `minimise` | `close` | `handleFile`
+type MessageType = `message` | `toggle-maximise` | `minimise` | `close` | `handleFile` | `os`
+
+type OS = `WSL` | `Linux` | `macOS` | `Windows`
 
 interface BridgeApi {
   sendMessage: (message: MessageType, data?: Record<string, unknown>) => void,
@@ -7,16 +9,24 @@ interface BridgeApi {
 
 declare const bridgeApi: BridgeApi
 
-interface DOCXFile {
+type DOCXFile = {
+  fileName: string,
+  directoryName: string,
   filePath: string,
-  tempPath: string,
-  zipFile: unzip
+  tempPath: string
 }
 
 type HyperlinkLocation = `document` | `footnotes`
 
-interface Hyperlink {
+type Hyperlink = {
   id: string,
   url: string,
   location: HyperlinkLocation,
+  text: string,
+}
+
+type BingsuFile = {
+  // use original path as unique ID
+  file: DOCXFile,
+  hyperlinks?: Hyperlink[]
 }

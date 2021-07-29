@@ -1,22 +1,31 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import isDev from 'electron-is-dev'
+import { exec } from 'child_process'
 import Controller from './controller'
-import Logger from './utils/Logger'
+import { isMacOS, isWSL } from './utils/System'
 
 let mainWindow: BrowserWindow
 
 const createWindow = () => {
-  mainWindow = new BrowserWindow({
+  const defaultConfig = {
     backgroundColor: `#fff`,
     frame: false,
     height: 600,
     // transparent: true,
-webPreferences: {
+    webPreferences: {
       nodeIntegration: true,
       preload: `${app.getAppPath()}/preload.js`,
     },
-    
     width: 800,
+  }
+  mainWindow = new BrowserWindow({
+    ...defaultConfig,
+    ...(isWSL()
+      ? {
+        autoHideMenuBar: true,
+        frame: true,
+        menuBarVisible: false,
+      } : {}),
   })
 
   const url = isDev
@@ -25,8 +34,17 @@ webPreferences: {
 
   mainWindow.loadURL(url)
 
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (isWSL()) {
+      exec(`explorer.exe "${url}"`)
+    } else {
+      shell.openExternal(url)
+    }
+    return { action: `deny` }
+  })
+
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
 const registerListeners = () => {
@@ -44,7 +62,7 @@ app.on(`activate`, function () {
 })
 
 app.on(`window-all-closed`, function () {
-  if (process.platform !== `darwin`) {
+  if (!isMacOS()) {
     app.quit()
   }
 })

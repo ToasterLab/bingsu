@@ -1,7 +1,8 @@
 export const MessageType: Record<string, MessageType> = {
-  MESSAGE: `message`,
-  TOGGLE_MAXIMISE: `toggle-maximise`,
-  MINIMISE: `minimise`,
   CLOSE: `close`,
   HANDLE_FILE: `handleFile`,
+  MESSAGE: `message`,
+  MINIMISE: `minimise`,
+  OS: `os`,
+  TOGGLE_MAXIMISE: `toggle-maximise`,
 } as const
