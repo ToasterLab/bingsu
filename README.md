@@ -1,6 +1,6 @@
 # Bingsu
 
-[![photo of bingsu by BennyNoon](./src/assets/img/bingsu-photo.jpg)](https://pixabay.com/photos/bingsu-menu-mango-3868700/)
+<img src="./src/assets/img/Bingsu.png" width="200" />
 
 Bingsu helps you prevent linkrot in your documents.
 
@@ -22,6 +22,7 @@ Electron is configured to listen for V8 inspector protocol messages on port `808
 
 ### WSL
 
-If you're running Bingsu in WSL, [`VcXsrv`](https://github.com/ArcticaProject/vcxsrv) seems to be the X server that works best.
+If you're running Bingsu in WSL, you need an X server running on the Windows side. The following work well:
 
-There is an issue with window controls on [MobaXterm](https://mobaxterm.mobatek.net/).
+- [`VcXsrv`](https://github.com/ArcticaProject/vcxsrv)
+- [MobaXterm](https://mobaxterm.mobatek.net/)
