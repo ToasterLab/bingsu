@@ -101,6 +101,7 @@ const getAllHyperlinks = async (
           return {
             id,
             location: file.entryName === documentLinksFile ? `document` : `footnotes`,
+            status: `UNPROCESSED`,
             text,
             url,
           }

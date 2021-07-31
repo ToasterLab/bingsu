@@ -1,9 +1,10 @@
 #process-confirmation-page {
   --action-bar-height: 32px;
+  height: inherit;
 
   > .file-results {
     padding: 2rem;
-    height: calc(100vh - var(--title-bar-height) - var(--action-bar-height));
+    height: calc(100% - var(--action-bar-height));
     overflow-y: auto;
     
 

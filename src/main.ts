@@ -11,7 +11,6 @@ const createWindow = () => {
     backgroundColor: `#fff`,
     frame: false,
     height: 600,
-    // transparent: true,
     webPreferences: {
       nodeIntegration: true,
       preload: `${app.getAppPath()}/preload.js`,

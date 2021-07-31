@@ -1,8 +1,53 @@
 import type { BrowserWindow } from "electron"
 import Logger from '../utils/Logger'
 import DOCX from '../utils/DOCX'
-import { MessageType } from '../utils/Constants'
+import { MessageType, URL_MAX_AGE } from '../utils/Constants'
 import { getOS } from '../utils/System'
+import Archiver from "../utils/Archiver"
+
+
+const handleFile = async (data: { filePath?: string }) => {
+  Logger.log(`Controller`, data)
+  if (data && `filePath` in data) {
+    const { filePath } = data
+    const docxFile = await DOCX.readFile(filePath as File[`path`])
+    try {
+      const links = await DOCX.getAllHyperlinks(docxFile)
+      return { file: docxFile, hyperlinks: links }
+    } catch (error) {
+      Logger.error(`Controller handleFile`, error)
+    } finally {
+      await DOCX.closeFile(docxFile)
+    }
+  }
+}
+
+const archiveURL = async (data: { url?: string }): Promise<ArchiveURLPayload> => {
+  if (data && `url` in data) {
+    const { url } = data
+    try {
+      const existingArchive = await Archiver.getArchive(url)
+      if (existingArchive) {
+        const { date, url } = existingArchive
+        if (url && ((date.getTime() + URL_MAX_AGE) >= Date.now())) {
+          return { status: `EXISTS`, url }
+        }
+      }
+
+      const newArchive = await Archiver.archiveURL(url)
+      if (newArchive) {
+        const { url } = newArchive
+        if (url) {
+          return { status: `NEW`, url }
+        }
+      }
+
+      throw new Error(`Archiving failed for unknown reason`)
+    } catch (error) {
+      return { error: error.message, status: `ERROR` }
+    }
+  }
+}
 
 // handles ipc messages from renderer received by Electron backend
 
@@ -32,24 +77,18 @@ const handle = async (
     }
 
     case MessageType.HANDLE_FILE: {
-      Logger.log(`Controller`, data)
-      if (data && `filePath` in data) {
-        const { filePath } = data
-        const docxFile = await DOCX.readFile(filePath as File[`path`])
-        try {
-          const links = await DOCX.getAllHyperlinks(docxFile)
-          event.reply(MessageType.HANDLE_FILE, { file: docxFile, hyperlinks: links })
-        } catch (error) {
-          Logger.error(`Controller handleFile`, error)
-        } finally {
-          await DOCX.closeFile(docxFile)
-        }
-      }
+      event.reply(MessageType.HANDLE_FILE, await handleFile(data))
       break
     }
 
     case MessageType.OS: {
       event.reply(MessageType.OS, { os: getOS() })
+      break
+    }
+      
+    case MessageType.ARCHIVE_URL: {
+      Logger.log(`ArchiveURL`, data)
+      event.reply(MessageType.ARCHIVE_URL, await archiveURL(data))
       break
     }
 

@@ -5,12 +5,12 @@ import TitleBar from './components/TitleBar'
 import InputPage from './pages/Input'
 import ProcessConfirmationPage from './pages/ProcessConfirmation'
 import Archiving from './pages/Archiving'
+import Output from './pages/Output'
 
 import './app.scss'
 import { MessageType } from '../utils/Constants'
 
 const App = () => {
-
   const [showTitleBar, setShowTitleBar] = React.useState(true)
 
   useEffect(() => {
@@ -37,6 +37,9 @@ const App = () => {
             </Route>
             <Route exact path="/archiving">
               <Archiving />
+            </Route>
+            <Route exact path="/output">
+              <Output />
             </Route>
         </Switch>
         </div>
