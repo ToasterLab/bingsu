@@ -19,6 +19,7 @@ const InputPage = () => {
   useEffect(() => {
     bridgeApi.on(MessageType.HANDLE_FILE, (data: Record<string, unknown>) => {
       const { file, hyperlinks } = data
+      Storage.clear()
       Storage.setFile(file as DOCXFile, hyperlinks as Hyperlink[])
       history.push(`/process-confirmation`)
     })

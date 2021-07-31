@@ -4,6 +4,9 @@ const api = {
   on: (channel: MessageType, callback: Function) => {
     ipcRenderer.on(channel, (event, data: Record<string, unknown>) => callback(data))
   },
+  removeAllListeners: (channel: MessageType) => {
+    ipcRenderer.removeAllListeners(channel)
+  },
   removeListener: (channel: MessageType, callback: (...arguments_: any[]) => void) => {
     ipcRenderer.removeListener(channel, callback)
   },

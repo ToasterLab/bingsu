@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useCallback } from 'react'
+import React, { useEffect, useCallback } from 'react'
 import { useHistory } from 'react-router-dom'
 import { MessageType } from '../../../utils/Constants'
 import Logger from '../../../utils/Logger'
 import useFiles from '../../hooks/useFiles'
+import useHyperlinkStats from '../../hooks/useHyperlinkStats'
 
 const Archiving = () => {
   const history = useHistory()
@@ -22,17 +23,7 @@ const Archiving = () => {
   const {
     erroredHyperlinks,
     progressPercentage,
-  } = useMemo(() => {
-    const processedHyperlinks = hyperlinks.filter(h => [`NEW`, `EXISTS`].includes(h.status)).length
-    const erroredHyperlinks = hyperlinks.filter(h => h.status === `ERROR`).length
-    const totalHyperlinks = hyperlinks.length
-    return {
-      erroredHyperlinks,
-      processedHyperlinks,
-      progressPercentage: (((processedHyperlinks + erroredHyperlinks) / totalHyperlinks) * 100) || 0,
-      totalHyperlinks,
-    }
-  }, [file])
+  } = useHyperlinkStats(hyperlinks)
 
   const processHyperlink = useCallback((url: Hyperlink[`url`]) => {
     bridgeApi.sendMessage(MessageType.ARCHIVE_URL, { url })
@@ -63,19 +54,15 @@ const Archiving = () => {
 
     bridgeApi.on(MessageType.ARCHIVE_URL, handleReply)
     return () => {
-      bridgeApi.removeListener(MessageType.ARCHIVE_URL, handleReply)
+      bridgeApi.removeAllListeners(MessageType.ARCHIVE_URL)
     }
   }, [setHyperlink, currentIndex])
 
   useEffect(() => {
-    console.log(`DONE?`, hyperlinks, progressPercentage)
     if (progressPercentage === 100) {
-      console.log(`DONE`)
       history.push(`/output`)
     }
   }, [progressPercentage])
-
-  console.log(`hyperlinks`, hyperlinks)
 
   return (
     <div id="archiving-page">

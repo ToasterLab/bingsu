@@ -8,6 +8,7 @@ interface BridgeApi {
   sendMessage: (message: MessageType, data?: Record<string, unknown>) => void,
   on: (channel: MessageType, callback: Function) => void,
   removeListener: (channel: MessageType, callback: (...arguments_: any[]) => void) => void,
+  removeAllListeners: (channel: MessageType) => void,
 }
 
 declare const bridgeApi: BridgeApi

@@ -73,7 +73,13 @@ const setHyperlinks = async (
   save()
 }
 
+const clear = () => {
+  database = { ...initialData }
+  save()
+}
+
 const Storage = {
+  clear,
   getFile,
   getFiles,
   init,
