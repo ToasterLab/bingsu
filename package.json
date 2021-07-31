@@ -1,10 +1,10 @@
 {
   "name": "bingsu",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "freezes your link references as-is to prevent linkrot",
   "license": "GPLv3",
   "author": "Huey Lee <hello@huey.xyz>",
-  "main": "./.webpack/main/index.js",
+  "main": "./webpack.config.js",
   "scripts": {
     "build": "webpack",
     "react:dev": "webpack serve --mode=development",
@@ -12,7 +12,9 @@
     "start:prod": "npm run build && electron ./dist/main.js",
     "start:dev": "concurrently --kill-others \"npm run react:dev\" \"npm run electron:dev\"",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "lint-staged": {
     "*.{js,ts,json}": [
@@ -28,6 +30,7 @@
   "dependencies": {
     "adm-zip": "^0.5.5",
     "axios": "^0.21.1",
+    "electron-squirrel-startup": "^1.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.3.4",
@@ -39,6 +42,9 @@
     "@babel/core": "^7.14.6",
     "@babel/preset-env": "^7.14.7",
     "@babel/preset-typescript": "^7.14.5",
+    "@electron-forge/cli": "^6.0.0-beta.59",
+    "@electron-forge/maker-deb": "^6.0.0-beta.59",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
     "@types/adm-zip": "^0.4.34",
     "@types/node": "^16.0.0",
     "@types/react": "^17.0.14",
@@ -77,5 +83,25 @@
   },
   "os": [
     "linux"
-  ]
+  ],
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "name": "Bingsu",
+        "executableName": "bingsu"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "bingsu"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        }
+      ]
+    }
+  }
 }

@@ -6,6 +6,8 @@ Bingsu helps you prevent linkrot in your documents.
 
 ## Development
 
+Only Linux development is supported.
+
 ```bash
 
 npm run start:dev
@@ -26,3 +28,13 @@ If you're running Bingsu in WSL, you need an X server running on the Windows sid
 
 - [`VcXsrv`](https://github.com/ArcticaProject/vcxsrv)
 - [MobaXterm](https://mobaxterm.mobatek.net/)
+
+### Packaging
+
+```bash
+apt install rpm -y
+```
+
+```bash
+npm run make
+```
