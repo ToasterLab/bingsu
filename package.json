@@ -1,12 +1,15 @@
 {
   "name": "bingsu",
-  "version": "0.0.1",
-  "description": "freezes your link references as-is to prevent linkrot",
+  "version": "0.0.2",
+  "description": "prevents linkrot in your documents",
   "license": "GPLv3",
   "author": "Huey Lee <hello@huey.xyz>",
   "main": "./webpack.config.js",
   "scripts": {
-    "build": "webpack",
+    "build:webpack": "webpack",
+    "build:windows": "npm run build:webpack && electron-forge make --targets @electron-forge/maker-squirrel",
+    "build:debian": "npm run build:webpack && electron-forge make --targets @electron-forge/maker-deb",
+    "build:macos": "npm run build:webpack && electron-forge make --targets @electron-forge/maker-dmg",
     "react:dev": "webpack serve --mode=development",
     "electron:dev": "nodemon",
     "start:prod": "npm run build && electron ./dist/main.js",
@@ -44,6 +47,7 @@
     "@babel/preset-typescript": "^7.14.5",
     "@electron-forge/cli": "^6.0.0-beta.59",
     "@electron-forge/maker-deb": "^6.0.0-beta.59",
+    "@electron-forge/maker-dmg": "^6.0.0-beta.59",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
     "@types/adm-zip": "^0.4.34",
     "@types/node": "^16.0.0",
@@ -82,7 +86,9 @@
     "node": ">=14.17.2"
   },
   "os": [
-    "linux"
+    "linux",
+    "darwin",
+    "win32"
   ],
   "config": {
     "forge": {
@@ -94,12 +100,26 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "bingsu"
+            "name": "Bingsu"
           }
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {
+            "options": {
+              "name": "Bingsu",
+              "categories": [
+                "Utility",
+                "Office"
+              ]
+            }
+          }
+        },
+        {
+          "name": "@electron-forge/maker-dmg",
+          "config": {
+            "name": "Bingsu"
+          }
         }
       ]
     }

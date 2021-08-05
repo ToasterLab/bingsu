@@ -4,6 +4,10 @@ import { exec } from 'child_process'
 import Controller from './controller'
 import { isMacOS, isWSL } from './utils/System'
 
+if (require(`electron-squirrel-startup`)) {
+  app.quit()
+}
+
 let mainWindow: BrowserWindow
 
 const createWindow = () => {

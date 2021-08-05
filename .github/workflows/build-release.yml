@@ -9,24 +9,63 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [macos-10.15, ubuntu-20.04, windows-2019]
     steps:
       - uses: actions/checkout@v2
         with:
           lfs: true
+
       - name: Use Node.JS
         uses: actions/setup-node@v2
         with:
           node-version: 16
           cache: npm
-      - name: install dependencies
-        run: npm ci && sudo apt-get install -y rpm jq
-      - name: version
-        run: echo "BINGSU_VERSION=$(cat package.json | jq -r .version)" >> $GITHUB_ENV
-        id: version
 
-      - name: build app
-        uses: samuelmeuli/action-electron-builder@v1
+      - name: install NPM dependencies
+        run: npm ci
+
+      - name: build distributables for macOS
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          npm run build:macos
+
+      - name: build distributables for Debian
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          npm run build:debian
+
+      - name: build distributables for Windows
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          npm run build:windows
+
+      - name: archive binaries
+        uses: actions/upload-artifact@v2
         with:
-          github_token: ${{ secrets.github_token }}
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          name: binaries
+          path: |
+            out/make/deb/x64/*.deb
+            out/make/squirrel.windows/x64/*.exe
+            out/make/*.dmg
+          retention-days: 1
+
+  release:
+    runs-on: ubuntu-20.04
+    needs: build
+    steps:
+      - name: Download binaries
+        uses: actions/download-artifact@v2
+
+      - run: ls -R
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: |
+            ./binaries/deb/x64/*.deb
+            ./binaries/squirrel.windows/x64/*.exe
+            ./binaries/*.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: hueyy/bingsu

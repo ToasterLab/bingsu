@@ -2,7 +2,7 @@
 
 <img src="./src/assets/img/Bingsu.png" width="200" />
 
-Bingsu helps prevent linkrot in your documents.
+Bingsu helps prevent linkrot by freezing (archiving) the hyperlinks in your documents.
 
 ## Development
 
