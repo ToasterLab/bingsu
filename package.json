@@ -1,6 +1,6 @@
 {
   "name": "bingsu",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "prevents linkrot in your documents",
   "license": "GPLv3",
   "author": "Huey Lee <hello@huey.xyz>",
@@ -36,25 +36,30 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "Bingsu"
+            "name": "Bingsu",
+            "setupIcon": "./src/assets/img/Bingsu.ico",
+            "iconUrl": "https://huey.xyz/bingsu.png"
           }
         },
         {
           "name": "@electron-forge/maker-deb",
           "config": {
             "options": {
-              "name": "Bingsu",
+              "name": "bingsu",
+              "productName": "Bingsu",
               "categories": [
                 "Utility",
                 "Office"
-              ]
+              ],
+              "icon": "./src/assets/img/Bingsu.png"
             }
           }
         },
         {
           "name": "@electron-forge/maker-dmg",
           "config": {
-            "name": "Bingsu"
+            "name": "Bingsu",
+            "icon": "./src/assets/img/Bingsu.ico"
           }
         }
       ],
