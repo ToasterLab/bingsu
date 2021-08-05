@@ -13,74 +13,19 @@
     "prepare": "husky install",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "start": "electron-forge start",
-    "lint:staged": "lint-staged"
+    "start": "electron-forge start"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json}": [
       "eslint --fix"
     ],
     "*.{ts,tsx}": [
-      "tsc --allowSyntheticDefaultImports --noEmit --esModuleInterop --moduleResolution node --skipLibCheck --resolveJsonModule"
+      "tsc-files --noEmit"
     ],
     "package.json": [
       "npx sort-package-json"
     ]
   },
-  "dependencies": {
-    "adm-zip": "^0.5.5",
-    "axios": "^0.21.1",
-    "electron-squirrel-startup": "^1.0.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-dropzone": "^11.3.4",
-    "react-icons": "^4.2.0",
-    "react-router-dom": "^5.2.0",
-    "xml2js": "^0.4.23"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.14.6",
-    "@babel/preset-env": "^7.14.7",
-    "@babel/preset-typescript": "^7.14.5",
-    "@electron-forge/cli": "^6.0.0-beta.59",
-    "@electron-forge/maker-deb": "^6.0.0-beta.59",
-    "@electron-forge/maker-dmg": "^6.0.0-beta.59",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
-    "@electron-forge/plugin-webpack": "^6.0.0-beta.59",
-    "@types/adm-zip": "^0.4.34",
-    "@types/node": "^16.0.0",
-    "@types/react": "^17.0.14",
-    "@types/react-dom": "^17.0.9",
-    "@types/xml2js": "^0.4.9",
-    "@typescript-eslint/eslint-plugin": "^4.28.1",
-    "@typescript-eslint/parser": "^4.28.1",
-    "css-loader": "^6.1.0",
-    "dotenv": "^10.0.0",
-    "electron": "^13.1.8",
-    "electron-is-dev": "^2.0.0",
-    "eslint": "^7.30.0",
-    "eslint-plugin-import": "^2.23.4",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-sonarjs": "^0.8.0-125",
-    "eslint-plugin-sort-keys-fix": "^1.1.1",
-    "eslint-plugin-unicorn": "^34.0.1",
-    "fork-ts-checker-webpack-plugin": "^6.3.1",
-    "husky": "^7.0.0",
-    "lint-staged": "^11.0.0",
-    "sass": "^1.35.2",
-    "sass-loader": "^12.1.0",
-    "style-loader": "^3.1.0",
-    "ts-loader": "^9.2.3",
-    "typescript": "^4.3.5"
-  },
-  "engines": {
-    "node": ">=14.17.2"
-  },
-  "os": [
-    "linux",
-    "darwin",
-    "win32"
-  ],
   "config": {
     "forge": {
       "packagerConfig": {
@@ -136,5 +81,59 @@
         ]
       ]
     }
-  }
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.5",
+    "axios": "^0.21.1",
+    "electron-squirrel-startup": "^1.0.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-dropzone": "^11.3.4",
+    "react-icons": "^4.2.0",
+    "react-router-dom": "^5.2.0",
+    "xml2js": "^0.4.23"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.6",
+    "@babel/preset-env": "^7.14.7",
+    "@babel/preset-typescript": "^7.14.5",
+    "@electron-forge/cli": "^6.0.0-beta.59",
+    "@electron-forge/maker-deb": "^6.0.0-beta.59",
+    "@electron-forge/maker-dmg": "^6.0.0-beta.59",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
+    "@electron-forge/plugin-webpack": "^6.0.0-beta.59",
+    "@types/adm-zip": "^0.4.34",
+    "@types/node": "^16.0.0",
+    "@types/react": "^17.0.14",
+    "@types/react-dom": "^17.0.9",
+    "@types/xml2js": "^0.4.9",
+    "@typescript-eslint/eslint-plugin": "^4.28.1",
+    "@typescript-eslint/parser": "^4.28.1",
+    "css-loader": "^6.1.0",
+    "dotenv": "^10.0.0",
+    "electron": "^13.1.8",
+    "electron-is-dev": "^2.0.0",
+    "eslint": "^7.30.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-sonarjs": "^0.8.0-125",
+    "eslint-plugin-sort-keys-fix": "^1.1.1",
+    "eslint-plugin-unicorn": "^34.0.1",
+    "fork-ts-checker-webpack-plugin": "^6.3.1",
+    "husky": "^7.0.0",
+    "sass": "^1.35.2",
+    "sass-loader": "^12.1.0",
+    "style-loader": "^3.1.0",
+    "ts-loader": "^9.2.3",
+    "tsc-files": "^1.1.2",
+    "typescript": "^4.3.5"
+  },
+  "engines": {
+    "node": ">=14.17.2"
+  },
+  "os": [
+    "linux",
+    "darwin",
+    "win32"
+  ]
 }
