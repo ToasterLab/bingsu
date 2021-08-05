@@ -6,22 +6,15 @@ Bingsu helps prevent linkrot by freezing (archiving) the hyperlinks in your docu
 
 ## Development
 
-Only Linux development is supported.
-
 ```bash
 
-npm run start:dev
+npm run start
 
 ```
 
 ### Debugging the web pages
 
 <kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>I</kbd> to open developer tools.
-
-### Debugging the main process
-
-Electron is configured to listen for V8 inspector protocol messages on port `8080`. You can use the debugger built into Chrome. Visit `chrome://inspect`, click on the Connection tab, add a connection to `localhost:8080`, and look at the console logs.
-
 ### WSL
 
 If you're running Bingsu in WSL, you need an X server running on the Windows side. The following work well:
@@ -31,10 +24,10 @@ If you're running Bingsu in WSL, you need an X server running on the Windows sid
 
 ### Packaging
 
-```bash
-apt install rpm -y
-```
+Building binaries is straighforward. On the appropriate platform, just run one of the following commands:
 
 ```bash
-npm run make
+npm run build:windows
+npm run build:debian
+npm run build:macos
 ```
