@@ -20,6 +20,7 @@ const App = () => {
       if (os === `WSL`) {
         setShowTitleBar(false)
       }
+      document.querySelector(`#app-container`).classList.add(`os-${os}`)
     })
   }, [])
 

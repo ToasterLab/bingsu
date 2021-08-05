@@ -1,12 +1,19 @@
+#app-container.os-WSL {
+  #process-confirmation-page {
+    > .file-results {
+      height: calc(100% - var(--action-bar-height));
+    }
+  }
+}
+
 #process-confirmation-page {
   --action-bar-height: 32px;
   height: inherit;
 
   > .file-results {
     padding: 2rem;
-    height: calc(100% - var(--action-bar-height));
+    height: calc(100% - var(--action-bar-height) - var(--title-bar-height));
     overflow-y: auto;
-    
 
     .file-info {
       margin-bottom: 2rem;
