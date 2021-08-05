@@ -13,13 +13,14 @@
     "prepare": "husky install",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "start": "electron-forge start"
+    "start": "electron-forge start",
+    "lint:staged": "lint-staged"
   },
   "lint-staged": {
-    "*.{js,ts,json}": [
+    "*.{js,jsx,ts,tsx,json}": [
       "eslint --fix"
     ],
-    "*.{ts}": [
+    "*.{ts,tsx}": [
       "tsc --allowSyntheticDefaultImports --noEmit --esModuleInterop --moduleResolution node --skipLibCheck --resolveJsonModule"
     ],
     "package.json": [
