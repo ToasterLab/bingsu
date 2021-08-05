@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import Storage from '../../../utils/Storage'
 import useFiles from '../../hooks/useFiles'
 import useHyperlinkStats from '../../hooks/useHyperlinkStats'
+import './Output.scss'
 
 const Output = () => {
 
@@ -27,7 +28,7 @@ const Output = () => {
           <>
             <h1>Done</h1>
             <p>Archived {totalHyperlinks} hyperlinks. There were {erroredHyperlinks} errors.</p>
-            <a href="/#/">Another file?</a>
+            <a href="#/">Another file?</a>
           </>
         )
         }

@@ -1,0 +1,22 @@
+#output-page {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+
+  > h1 {
+    margin-bottom: 1rem;
+  }
+
+  > a {
+    margin-top: 1rem;
+    background-color: var(--app-colour-dark);
+    font-size: var(--font-size-normal);
+    padding: 0.5rem;
+    color: var(--text-colour);
+    text-decoration: none;
+  }
+}

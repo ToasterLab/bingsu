@@ -1,4 +1,5 @@
 import React from 'react'
+import { cleanURL } from '../../../utils/Utils'
 import useFiles from '../../hooks/useFiles'
 import './ProcessConfirmation.scss'
 
@@ -36,18 +37,16 @@ const ProcessConfirmationPage = () => {
                       <td>No.</td>
                       <td>Text</td>
                       <td>URL</td>
-                      <td>Location</td>
                     </tr>
                   </thead>
                   <tbody>
-                    {hyperlinks.map(({ text, url, location }, index) => (
+                    {hyperlinks.map(({ text, url }, index) => (
                       <tr key={`${text}-${url}-${index}`}>
                         <td>{index + 1}</td>
                         <td>{text}</td>
                         <td>
-                          <a href={url} target="_blank">{url}</a>
+                          <a href={url} target="_blank">{cleanURL(url)}</a>
                         </td>
-                        <td>{location}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -55,7 +54,7 @@ const ProcessConfirmationPage = () => {
               </div>
             </div>
             <div className="action-bar">
-              <a href="/#/archiving">
+              <a href="#/archiving">
                 PROCEED
               </a>
             </div>

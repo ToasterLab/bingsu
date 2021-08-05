@@ -1,12 +1,13 @@
 import React, { useEffect, useCallback } from 'react'
-import { useHistory } from 'react-router-dom'
 import { MessageType } from '../../../utils/Constants'
 import Logger from '../../../utils/Logger'
+import Navigator from '../../../utils/Navigator'
+import { cleanURL } from '../../../utils/Utils'
 import useFiles from '../../hooks/useFiles'
 import useHyperlinkStats from '../../hooks/useHyperlinkStats'
+import './Archiving.scss'
 
 const Archiving = () => {
-  const history = useHistory()
   const { file, isLoading, setHyperlink } = useFiles()
   const {
     file: {
@@ -60,7 +61,7 @@ const Archiving = () => {
 
   useEffect(() => {
     if (progressPercentage === 100) {
-      history.push(`/output`)
+      Navigator.navigateTo(`output`)
     }
   }, [progressPercentage])
 
@@ -73,8 +74,10 @@ const Archiving = () => {
           <>
             <h1>{fileName}</h1>
             <p>{erroredHyperlinks} errors</p>
-            <p>{progressPercentage}%</p>
-            <p>{url}</p>
+            <p>{Number(progressPercentage).toFixed(1)}%</p>
+            <p>
+              <a href={url}>{cleanURL(url)}</a>
+            </p>
           </>
         )
       }

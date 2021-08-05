@@ -1,23 +1,19 @@
 {
   "name": "bingsu",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "prevents linkrot in your documents",
   "license": "GPLv3",
   "author": "Huey Lee <hello@huey.xyz>",
-  "main": "./webpack.config.js",
+  "main": ".webpack/main",
   "scripts": {
-    "build:webpack": "webpack",
-    "build:windows": "npm run build:webpack && electron-forge make --targets @electron-forge/maker-squirrel",
-    "build:debian": "npm run build:webpack && electron-forge make --targets @electron-forge/maker-deb",
-    "build:macos": "npm run build:webpack && electron-forge make --targets @electron-forge/maker-dmg",
-    "react:dev": "webpack serve --mode=development",
-    "electron:dev": "nodemon",
-    "start:prod": "npm run build && electron ./dist/main.js",
-    "start:dev": "concurrently --kill-others \"npm run react:dev\" \"npm run electron:dev\"",
+    "build:windows": "electron-forge make --targets @electron-forge/maker-squirrel",
+    "build:debian": "electron-forge make --targets @electron-forge/maker-deb",
+    "build:macos": "electron-forge make --targets @electron-forge/maker-dmg",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "start": "electron-forge start"
   },
   "lint-staged": {
     "*.{js,ts,json}": [
@@ -49,6 +45,7 @@
     "@electron-forge/maker-deb": "^6.0.0-beta.59",
     "@electron-forge/maker-dmg": "^6.0.0-beta.59",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.59",
+    "@electron-forge/plugin-webpack": "^6.0.0-beta.59",
     "@types/adm-zip": "^0.4.34",
     "@types/node": "^16.0.0",
     "@types/react": "^17.0.14",
@@ -56,11 +53,9 @@
     "@types/xml2js": "^0.4.9",
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.28.1",
-    "concurrently": "^6.2.0",
-    "copy-webpack-plugin": "^9.0.1",
     "css-loader": "^6.1.0",
     "dotenv": "^10.0.0",
-    "electron": "^13.1.6",
+    "electron": "^13.1.8",
     "electron-is-dev": "^2.0.0",
     "eslint": "^7.30.0",
     "eslint-plugin-import": "^2.23.4",
@@ -68,19 +63,14 @@
     "eslint-plugin-sonarjs": "^0.8.0-125",
     "eslint-plugin-sort-keys-fix": "^1.1.1",
     "eslint-plugin-unicorn": "^34.0.1",
-    "html-webpack-plugin": "^5.3.2",
+    "fork-ts-checker-webpack-plugin": "^6.3.1",
     "husky": "^7.0.0",
     "lint-staged": "^11.0.0",
-    "nodemon": "^2.0.12",
-    "react-hot-loader": "^4.13.0",
     "sass": "^1.35.2",
     "sass-loader": "^12.1.0",
     "style-loader": "^3.1.0",
     "ts-loader": "^9.2.3",
-    "typescript": "^4.3.5",
-    "webpack": "^5.45.1",
-    "webpack-cli": "^4.7.2",
-    "webpack-dev-server": "^3.11.2"
+    "typescript": "^4.3.5"
   },
   "engines": {
     "node": ">=14.17.2"
@@ -121,6 +111,28 @@
             "name": "Bingsu"
           }
         }
+      ],
+      "plugins": [
+        [
+          "@electron-forge/plugin-webpack",
+          {
+            "mainConfig": "./webpack.main.config.js",
+            "renderer": {
+              "config": "./webpack.renderer.config.js",
+              "entryPoints": [
+                {
+                  "html": "./src/index.html",
+                  "js": "./src/renderer.tsx",
+                  "name": "main_window",
+                  "preload": {
+                    "js": "./src/electron/preload.ts"
+                  }
+                }
+              ]
+            },
+            "devContentSecurityPolicy": "default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-eval' 'unsafe-inline' data:"
+          }
+        ]
       ]
     }
   }

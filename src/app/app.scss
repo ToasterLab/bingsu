@@ -6,6 +6,7 @@
   border: 0;
   vertical-align: baseline;
   box-sizing: border-box;
+  user-select: none;
 }
 
 html,
@@ -28,4 +29,8 @@ body {
   color: var(--text-colour);
   background-color: var(--app-colour);
   height: inherit;
+}
+
+::selection {
+  background: var(--selection-colour);
 }
