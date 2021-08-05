@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, shell, Menu } from 'electron'
 import isDev from 'electron-is-dev'
 import { exec } from 'child_process'
 import Controller from './controller'
@@ -19,6 +19,7 @@ const createWindow = () => {
     frame: false,
     height: 600,
     webPreferences: {
+      devTools: isDev,
       nodeIntegration: true,
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
@@ -45,8 +46,14 @@ const createWindow = () => {
     return { action: `deny` }
   })
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  if (isDev) {
+    mainWindow.webContents.openDevTools()
+  } else {
+    // disable alt menu bar
+    mainWindow.setMenu(null)
+    mainWindow.setMenuBarVisibility(false)
+    Menu.setApplicationMenu(null)
+  }
 }
 
 const registerListeners = () => {
