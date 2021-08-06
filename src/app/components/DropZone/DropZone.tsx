@@ -1,5 +1,5 @@
-import React from 'react'
-import { useCallback } from 'react'
+import React, { useCallback } from 'react'
+
 import { DropzoneOptions, useDropzone } from 'react-dropzone'
 import { FiUpload } from 'react-icons/fi'
 import './DropZone.scss'
@@ -20,13 +20,13 @@ const DropZone: React.FC<Props> = ({
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: internalOnDrop,
-    maxFiles: 1,
     accept: `application/vnd.openxmlformats-officedocument.wordprocessingml.document`,
+    maxFiles: 1,
+    onDrop: internalOnDrop,
   })
 
   return (
-    <div id="dropzone" {...getRootProps()}>
+    <div id="dropzone" className={isDragActive ? `drag-active` : ``} {...getRootProps()}>
       <input {...getInputProps()} />
       <div id="icon">
         <FiUpload size="100" />

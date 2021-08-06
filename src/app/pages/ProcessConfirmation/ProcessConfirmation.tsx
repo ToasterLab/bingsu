@@ -1,6 +1,8 @@
 import React from 'react'
 import { cleanURL } from '../../../utils/Utils'
+import DurationInput from '../../components/DurationInput'
 import useFiles from '../../hooks/useFiles'
+import useMaxArchiveAge from '../../hooks/useMaxArchiveAge'
 import './ProcessConfirmation.scss'
 
 const ProcessConfirmationPage = () => {
@@ -13,6 +15,8 @@ const ProcessConfirmationPage = () => {
     },
     hyperlinks,
   } = file
+
+  const { maxArchiveAge, onMaxArchiveAgeChange } = useMaxArchiveAge()
 
   return (
     <div id="process-confirmation-page">
@@ -28,6 +32,15 @@ const ProcessConfirmationPage = () => {
                   <strong>Folder: </strong>
                   <span>{directoryName}</span>
                 </p>
+              </div>
+              <div className="options">
+                <h2>Options</h2>
+                <DurationInput
+                  label="Max Archive Age (in days)"
+                  description={`Re-archive hyperlinks that were archived more than ${maxArchiveAge} days ago`}
+                  value={maxArchiveAge}
+                  onChange={onMaxArchiveAgeChange}
+                />
               </div>
               <div className="links-list">
                 <p>Found {hyperlinks.length} hyperlinks:</p>

@@ -3,14 +3,17 @@
 // need to write getter and setter code that goes
 // through electron's IPC communication
 
+import { URL_MAX_AGE } from './Constants'
 import Logger from './Logger'
 
 type Data = {
   files: BingsuFile[],
+  maxArchiveAge: number,
 }
 
 const initialData: Data = {
   files: [],
+  maxArchiveAge: URL_MAX_AGE,
 }
 
 const databaseName = `bingsu_db`
@@ -36,24 +39,20 @@ const setFile = async (file: DOCXFile, hyperlinks: Hyperlink[]) => {
   const { files } = database
   const { filePath } = file
   const existingIndex = findExistingFileIndex(files, filePath)
-  if (existingIndex !== -1) {
-    database = {
-      ...database,
-      files: [
-        ...files.slice(0, existingIndex),
-        {
-          ...files[existingIndex],
-          file,
-          hyperlinks,
-        },
-        ...files.slice(existingIndex + 1),
-      ],
-    }
-  } else {
-    database.files = [
+  database = {
+    ...database,
+    files: existingIndex !== -1 ? [
+      ...files.slice(0, existingIndex),
+      {
+        ...files[existingIndex],
+        file,
+        hyperlinks,
+      },
+      ...files.slice(existingIndex + 1),
+    ] : [
       ...files,
       { file, hyperlinks },
-    ]
+    ],
   }
   Logger.log(`setFile`, database, files)
   save()
@@ -73,6 +72,15 @@ const setHyperlinks = async (
   save()
 }
 
+const setMaxArchiveAge = (newValue: number) => {
+  database = {
+    ...database,
+    maxArchiveAge: newValue,
+  }
+  save()
+}
+const getMaxArchiveAge = () => database.maxArchiveAge
+
 const clear = () => {
   database = { ...initialData }
   save()
@@ -82,9 +90,11 @@ const Storage = {
   clear,
   getFile,
   getFiles,
+  getMaxArchiveAge,
   init,
   setFile,
   setHyperlinks,
+  setMaxArchiveAge,
 }
 
 export default Storage
