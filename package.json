@@ -1,6 +1,6 @@
 {
   "name": "bingsu",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "prevents linkrot in your documents",
   "license": "GPLv3",
   "author": "Huey Lee <hello@huey.xyz>",
