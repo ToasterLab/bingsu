@@ -40,6 +40,7 @@ const ProcessConfirmationPage = () => {
                   description={`Re-archive hyperlinks that were archived more than ${maxArchiveAge} days ago`}
                   value={maxArchiveAge}
                   onChange={onMaxArchiveAgeChange}
+                  placeholder="30"
                 />
               </div>
               <div className="links-list">
@@ -47,7 +48,6 @@ const ProcessConfirmationPage = () => {
                 <table>
                   <thead>
                     <tr>
-                      <td>No.</td>
                       <td>Text</td>
                       <td>URL</td>
                     </tr>
@@ -55,7 +55,6 @@ const ProcessConfirmationPage = () => {
                   <tbody>
                     {hyperlinks.map(({ text, url }, index) => (
                       <tr key={`${text}-${url}-${index}`}>
-                        <td>{index + 1}</td>
                         <td>{text}</td>
                         <td>
                           <a href={url} target="_blank">{cleanURL(url)}</a>
@@ -67,6 +66,9 @@ const ProcessConfirmationPage = () => {
               </div>
             </div>
             <div className="action-bar">
+              <a href="#/">
+                BACK
+              </a>
               <a href="#/archiving">
                 PROCEED
               </a>

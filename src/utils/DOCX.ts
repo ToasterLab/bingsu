@@ -93,7 +93,7 @@ const getZipFile = (zipEntries: unzip.IZipEntry[], fileName: string) => zipEntri
   ),
 )
 
-const isEmptyString = (variable: null | string): boolean => (variable === null || variable.length > 0)
+const isEmptyString = (variable: null | string): boolean => (variable === null || variable.length === 0)
 
 const getAllHyperlinks = async (
   DOCXFile: DOCXFile,
@@ -154,6 +154,8 @@ const getAllHyperlinks = async (
 
     hyperlinks.push(...links)
   }
+
+  Logger.log(`Found hyperlinks:`, hyperlinks)
 
   return hyperlinks
 }

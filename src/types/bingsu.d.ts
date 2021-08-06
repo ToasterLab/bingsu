@@ -30,6 +30,7 @@ type Hyperlink = {
   text: string,
   status: HyperlinkStatus,
   archivedURL?: string,
+  lastArchiveDate?: Date,
 }
 
 type BingsuFile = {
@@ -44,4 +45,5 @@ type ArchiveURLPayload = {
   status: ArchiveURLStatus,
   error?: string,
   url?: string,
+  lastArchiveDate?: Date,
 }

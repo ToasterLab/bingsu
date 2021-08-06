@@ -1,0 +1,17 @@
+.duration-input {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  > input {
+    margin-left: 1rem;
+    background: none;
+    padding: 0.5rem;
+    font-size: var(--font-size-normal);
+    border-bottom: 1px solid var(--text-colour);
+    outline: none;
+    justify-self: stretch;
+    flex-grow: 1;
+    max-width: 300px;
+  }
+}

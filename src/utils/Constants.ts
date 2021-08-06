@@ -8,4 +8,4 @@ export const MessageType: Record<string, MessageType> = {
   TOGGLE_MAXIMISE: `toggle-maximise`,
 } as const
 
-export const URL_MAX_AGE = 1000 * 60 * 60 * 24 * 182 // 6 months
+export const URL_MAX_AGE = 30 // (in days)

@@ -15,7 +15,7 @@
     height: calc(100% - var(--action-bar-height) - var(--title-bar-height));
     overflow-y: auto;
 
-    .file-info {
+    > .file-info {
       margin-bottom: 2rem;
 
       > h1 {
@@ -23,7 +23,11 @@
       }
     }
 
-    .links-list {
+    > .options {
+      margin-bottom: 2rem;
+    }
+
+    > .links-list {
       > p {
         margin-bottom: 1rem;
       }
@@ -32,7 +36,11 @@
         >thead,tbody{
           >tr {
             >td {
-              padding: 0.2rem;
+              padding: 0.3rem;
+
+              &:first-of-type {
+                padding-left: 0;
+              }
             }
           }
         }
@@ -75,6 +83,10 @@
       display: flex;
       justify-content: center;
       align-items: center;
+
+      & + a {
+        border-left: 1px solid black;
+      }
     }
   }
 }

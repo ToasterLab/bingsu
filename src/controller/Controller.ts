@@ -1,7 +1,7 @@
 import type { BrowserWindow } from "electron"
 import Logger from '../utils/Logger'
 import DOCX from '../utils/DOCX'
-import { MessageType, URL_MAX_AGE } from '../utils/Constants'
+import { MessageType } from '../utils/Constants'
 import { getOS } from '../utils/System'
 import Archiver from "../utils/Archiver"
 
@@ -22,15 +22,17 @@ const handleFile = async (data: { filePath?: string }) => {
   }
 }
 
-const archiveURL = async (data: { url?: string }): Promise<ArchiveURLPayload> => {
-  if (data && `url` in data) {
-    const { url } = data
+const archiveURL = async (data: { url?: string, maxAge?: number }): Promise<ArchiveURLPayload> => {
+  if (data && `url` in data && `maxAge` in data) {
+    const { url, maxAge } = data
     try {
       const existingArchive = await Archiver.getArchive(url)
       if (existingArchive) {
         const { date, url } = existingArchive
-        if (url && ((date.getTime() + URL_MAX_AGE) >= Date.now())) {
-          return { status: `EXISTS`, url }
+        const maxAgeInMilliseconds = maxAge * 24 * 60 * 60 * 1000
+        Logger.log(`Compare dates: `, date, new Date(date.getTime() + maxAgeInMilliseconds))
+        if (url && ((date.getTime() + maxAgeInMilliseconds) >= Date.now())) {
+          return { lastArchiveDate: date, status: `EXISTS`, url }
         }
       }
 
@@ -87,7 +89,6 @@ const handle = async (
     }
       
     case MessageType.ARCHIVE_URL: {
-      Logger.log(`ArchiveURL`, data)
       event.reply(MessageType.ARCHIVE_URL, await archiveURL(data))
       break
     }

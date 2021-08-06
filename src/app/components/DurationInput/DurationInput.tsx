@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react'
+import './DurationInput.scss'
 
 type Props = {
   min?: number,
@@ -20,15 +21,19 @@ const DurationInput: React.FC<Props> = ({
   onChange = () => {},
 } = {}) => {
   const onNumberChange = useCallback((event) => {
-    const text: number = event.target.value
-    onChange(text)
+    const number: number = Number.parseInt(event.target.value, 10)
+    if (Number.isNaN(number)) {
+      onChange(min)
+    } else if (number >= min && number <= max) {
+      onChange(number)
+    }
   }, [])
 
   return (
     <div className="duration-input">
       <label title={description}>{label}</label>
       <input
-        type="number"
+        type="text"
         min={min}
         max={max}
         placeholder={placeholder}

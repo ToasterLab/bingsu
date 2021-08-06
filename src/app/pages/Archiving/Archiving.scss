@@ -11,12 +11,15 @@
     margin-bottom: 1rem;
   }
 
-  > p + p {
+  p + p {
     margin-top: 1rem;
   }
 
-  > p > a {
-    text-decoration: none;
-    user-select: text;
+  .hyperlink-info {
+    margin-top: 1rem;
+    a {
+      text-decoration: none;
+      user-select: text;
+    }
   }
 }

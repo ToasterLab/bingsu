@@ -17,14 +17,14 @@ const useFiles = () => {
     })
   }, [file, setFile])
 
-  const setHyperlink = useCallback((index: number, data: Record<string, string>) => {
+  const setHyperlink = useCallback((index: number, data: Partial<Hyperlink>) => {
     Logger.log(`setHyperlink`, index, data, file.hyperlinks)
     setHyperlinks([
       ...file.hyperlinks.slice(0, index),
       {
         ...file.hyperlinks[index],
         ...data,
-      },
+      } as Hyperlink,
       ...file.hyperlinks.slice(index + 1),
     ])
   }, [file, setHyperlinks])

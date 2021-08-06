@@ -13,7 +13,7 @@
     "prepare": "husky install",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "start": "electron-forge start"
+    "start": "electron-forge start --inspect-electron"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json}": [
@@ -69,6 +69,7 @@
           {
             "mainConfig": "./webpack.main.config.js",
             "renderer": {
+              "nodeIntegration": true,
               "config": "./webpack.renderer.config.js",
               "entryPoints": [
                 {
@@ -80,8 +81,7 @@
                   }
                 }
               ]
-            },
-            "devContentSecurityPolicy": "default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-eval' 'unsafe-inline' data:"
+            }
           }
         ]
       ]
@@ -117,7 +117,6 @@
     "css-loader": "^6.2.0",
     "dotenv": "^10.0.0",
     "electron": "^13.1.8",
-    "electron-is-dev": "^2.0.0",
     "eslint": "^7.32.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-node": "^11.1.0",

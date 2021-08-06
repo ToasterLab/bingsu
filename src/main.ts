@@ -1,5 +1,4 @@
 import { app, BrowserWindow, ipcMain, shell, Menu } from 'electron'
-import isDev from 'electron-is-dev'
 import { exec } from 'child_process'
 import Controller from './controller'
 import { isMacOS, isWSL } from './utils/System'
@@ -19,7 +18,7 @@ const createWindow = () => {
     frame: false,
     height: 600,
     webPreferences: {
-      devTools: isDev,
+      devTools: !app.isPackaged,
       nodeIntegration: true,
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
@@ -46,7 +45,7 @@ const createWindow = () => {
     return { action: `deny` }
   })
 
-  if (isDev) {
+  if (!app.isPackaged) {
     mainWindow.webContents.openDevTools()
   } else {
     // disable alt menu bar

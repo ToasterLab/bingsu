@@ -5,7 +5,10 @@ import Navigator from '../../../utils/Navigator'
 import { cleanURL } from '../../../utils/Utils'
 import useFiles from '../../hooks/useFiles'
 import useHyperlinkStats from '../../hooks/useHyperlinkStats'
+import useMaxArchiveAge from '../../hooks/useMaxArchiveAge'
 import './Archiving.scss'
+
+const emptyHyperlink: Hyperlink = { id: ``, lastArchiveDate: new Date(), location: `document`, status: `PROCESSING`, text: ``, url: `` }
 
 const Archiving = () => {
   const { file, isLoading, setHyperlink } = useFiles()
@@ -16,9 +19,12 @@ const Archiving = () => {
     hyperlinks,
   } = file
   const [currentIndex, setCurrentIndex] = React.useState(0)
-  const currentHyperlink = hyperlinks[currentIndex] || { url: `` }
+  const currentHyperlink = hyperlinks[currentIndex] || emptyHyperlink
   const {
     url,
+    text,
+    status,
+    lastArchiveDate,
   } = currentHyperlink
 
   const {
@@ -26,9 +32,11 @@ const Archiving = () => {
     progressPercentage,
   } = useHyperlinkStats(hyperlinks)
 
+  const { maxArchiveAge } = useMaxArchiveAge()
+
   const processHyperlink = useCallback((url: Hyperlink[`url`]) => {
-    bridgeApi.sendMessage(MessageType.ARCHIVE_URL, { url })
-  }, [])
+    bridgeApi.sendMessage(MessageType.ARCHIVE_URL, { maxAge: maxArchiveAge, url })
+  }, [maxArchiveAge])
 
   useEffect(() => {
     const doneProcessing = hyperlinks.findIndex(h => h.status === `PROCESSING`) === -1
@@ -46,11 +54,11 @@ const Archiving = () => {
   useEffect(() => {
     const handleReply = (data: ArchiveURLPayload) => {
       Logger.log(`archive result`, data, currentIndex)
-      const { status, error, url } = data
+      const { status, error, url, lastArchiveDate } = data
       if (error) {
         Logger.error(hyperlinks[currentIndex], error)
       }
-      setHyperlink(currentIndex, { archivedURL: url, status })
+      setHyperlink(currentIndex, { archivedURL: url, lastArchiveDate, status })
     }
 
     bridgeApi.on(MessageType.ARCHIVE_URL, handleReply)
@@ -73,11 +81,17 @@ const Archiving = () => {
         ) : (
           <>
             <h1>{fileName}</h1>
-            <p>{erroredHyperlinks} errors</p>
+              {erroredHyperlinks > 0 ? <p>{erroredHyperlinks} errors</p> : null}
             <p>{Number(progressPercentage).toFixed(1)}%</p>
-            <p>
-              <a href={url}>{cleanURL(url)}</a>
-            </p>
+            <div className="hyperlink-info">
+              <p>{text}</p>
+              <p><a href={url}>{cleanURL(url)}</a></p>
+              <p>
+                {(status === `EXISTS` && lastArchiveDate)
+                  ? `Already archived on ${lastArchiveDate.toLocaleString()}`
+                  : (status === `NEW` ? `Archiving now...` : ``)}
+              </p>
+            </div>
           </>
         )
       }
