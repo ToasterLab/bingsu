@@ -5,3 +5,5 @@ node_modules
 /.webpack
 *.xml
 out/
+*.docx
+/playground

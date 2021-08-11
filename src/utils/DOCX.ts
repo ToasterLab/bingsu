@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import unzip from 'adm-zip'
-import xml2js from 'xml2js'
+import { js2xml, xml2js } from 'xml-js'
 import crypto from 'crypto'
 import Logger from './Logger'
 
@@ -34,7 +34,6 @@ const closeFile = async (DOCXFile: DOCXFile): Promise<void> => {
   const { filePath, tempPath } = DOCXFile
   await fs.promises.copyFile(tempPath, filePath)
   await fs.promises.unlink(tempPath)
-  // await zipFile.writeZip(filePath)
   // const zipFile: unzip = new unzip(temporaryPath)
 }
 
@@ -48,71 +47,101 @@ const footnotesLinksFile = `word/_rels/footnotes.xml.rels` as const
 const footnotesFile = `word/footnotes.xml`
 const documentTextFile = `word/document.xml`
 
-const assembleHyperlinkText = (elementList) => elementList.map((element) => {
-  if (`w:t` in element) {
-    return (
-      element[`w:t`]
-        .map((value) => typeof value === `string` ? value : ``)
-        .join(``)
-    )
-  }
-  return ``
-}).join(``)
+const hasElements = (element) => Array.isArray(element?.elements) && element.elements.length > 0
+const assembleHyperlinkText = (elementList): string => elementList.map(wR => (hasElements(wR)
+  ? (wR.elements.filter(element => element?.name === `w:t`).map(element => {
+    if (!hasElements(element)) {
+      return ``
+    }
+    return element.elements.map(child => {
+      if (child?.type === `text`) {
+        return child?.text
+      }
+      console.log(child)
+      return ``
+    }).join(``)
+  }))
+  : ``),
+).join(``)
 
-const getFootnoteText = async (footnoteContents: string) => {
+const getHyperlinkText = (hyperlinkElement): string => {
+  if (!hasElements(hyperlinkElement)) {
+    return ``
+  }
+  return assembleHyperlinkText(
+    hyperlinkElement.elements.filter(
+      child => child.name === `w:r` && Array.isArray(child?.elements),
+    ),
+  )
+}
+
+const findElement = (elements, elementName: string) => elements.find(element => element.name === elementName)
+const findParagraphElement = (elements) => elements.find(element => element?.name === `w:p`)
+const findHyperlinkElement = (elements) => elements.find(element => element?.name === `w:hyperlink`)
+const getFootnoteText = (footnoteContents: string) => {
   const footnotes = {}
-  const footnoteXmlContent = await xml2js.parseStringPromise(footnoteContents)
-  for (const footnote of footnoteXmlContent[`w:footnotes`][`w:footnote`]) {
-    if (`w:p` in footnote) {
-      const contents = footnote[`w:p`][0]
-      if (`w:hyperlink` in contents) {
-        const id = contents[`w:hyperlink`][0][`$`][`r:id`]
-        const text = assembleHyperlinkText(contents[`w:hyperlink`][0][`w:r`])
-        footnotes[id] = text
+  const footnoteXmlContent = xml2js(footnoteContents)
+  for (const footnote of footnoteXmlContent.elements[0].elements) {
+    if (hasElements(footnote)) {
+      const wpElement = findParagraphElement(footnote.elements)
+      if (wpElement && hasElements(wpElement)) {
+        const hyperlinkElement = findHyperlinkElement(wpElement.elements)
+        if (hyperlinkElement) {
+          const id: string = hyperlinkElement?.attributes[`r:id`]
+          const text = getHyperlinkText(hyperlinkElement)
+          footnotes[id] = text
+        }
       }
     }
   }
   return footnotes
 }
 
-const getDocumentText = async (documentContents: string) => {
+const getDocumentText = (documentContents: string) => {
   const documentHyperlinks = {}
-  const documentXmlContent = await xml2js.parseStringPromise(documentContents)
-  for (const element of documentXmlContent[`w:document`][`w:body`][0][`w:p`]) {
-    if (`w:hyperlink` in element) {
-      const id = element[`w:hyperlink`][0][`$`][`r:id`]
-      const text = assembleHyperlinkText(element[`w:hyperlink`][0][`w:r`])
+  const documentXmlContent = xml2js(documentContents)
+  const paragraphElements = documentXmlContent.elements[0].elements[0].elements.filter(
+    element => element.name === `w:p` && hasElements(element),
+  )
+  for (const element of paragraphElements) {
+    const hyperlinkElement = findHyperlinkElement(element.elements)
+    if (hyperlinkElement) {
+      const id: string = hyperlinkElement?.attributes[`r:id`]
+      const text = getHyperlinkText(hyperlinkElement)
       documentHyperlinks[id] = text
     }
   }
+  return documentHyperlinks
 }
 
-const getZipFile = (zipEntries: unzip.IZipEntry[], fileName: string) => zipEntries.find(
+const getFileInZip = (zipEntries: unzip.IZipEntry[], fileName: string) => zipEntries.find(
   ({ entryName }) => (
     entryName === fileName
   ),
 )
 
-const isEmptyString = (variable: null | string): boolean => (variable === null || variable.length === 0)
+const isEmptyString = (variable: undefined | null | string): boolean => (typeof variable == `undefined` || variable === null || variable.length === 0)
+const openZipFile = (file: DOCXFile) => {
+  const zipFile = new unzip(file.tempPath)
+  const zipEntries = zipFile.getEntries()
+  return { zipEntries, zipFile }
+}
 
-const getAllHyperlinks = async (
+const getAllHyperlinks = (
   DOCXFile: DOCXFile,
   { document, footnotes = true } = {} as getAllHyperlinksOptions,
 // eslint-disable-next-line sonarjs/cognitive-complexity
-): Promise<Hyperlink[]> => {
-  const { tempPath } = DOCXFile
-  const zipFile: unzip = new unzip(tempPath)
-  const zipEntries = zipFile.getEntries()
-
-  const footnoteFile = getZipFile(zipEntries, footnotesFile)
-  const documentFile = getZipFile(zipEntries, documentTextFile)
+): Hyperlink[] => {
+  const { zipFile, zipEntries } = openZipFile(DOCXFile)
+  const footnoteFile = getFileInZip(zipEntries, footnotesFile)
+  const documentFile = getFileInZip(zipEntries, documentTextFile)
 
   const footnotesObject = footnoteFile
-    ? await getFootnoteText(zipFile.readAsText(footnoteFile))
+    ? getFootnoteText(zipFile.readAsText(footnoteFile))
     : {}
   
   const documentObject = documentTextFile
-    ? await getDocumentText(zipFile.readAsText(documentFile))
+    ? getDocumentText(zipFile.readAsText(documentFile))
     : {}
 
   const files = zipEntries.filter(({ entryName }) => (
@@ -123,34 +152,29 @@ const getAllHyperlinks = async (
   const hyperlinks: Hyperlink[] = []
   for (const file of files) {
     const fileContents = zipFile.readAsText(file)
-    const xmlContent = await xml2js.parseStringPromise(fileContents)
-    const links: Hyperlink[] = xmlContent[`Relationships`][`Relationship`].map(
+    const xmlContent = xml2js(fileContents)
+    const links: Hyperlink[] = xmlContent.elements[0].elements.map(
       (relationship): Hyperlink | null => {
-        const targetMode = relationship[`$`][`TargetMode`]
-        if (targetMode === `External`) {
-          const id = relationship[`$`][`Id`]
-          const url = relationship[`$`][`Target`]
-          const text = file.entryName === documentLinksFile
-            ? documentObject[id]
-            : footnotesObject[id]
-          
-          if (isEmptyString(id) || isEmptyString(url) || isEmptyString(text)) {
-            return null
-          }
-          
-          return {
-            id,
-            location: file.entryName === documentLinksFile ? `document` : `footnotes`,
-            status: `UNPROCESSED`,
-            text,
-            url,
+        const { attributes: { Target, TargetMode } } = relationship
+        if (TargetMode === `External` && Target) {
+          const { attributes: { Id } } = relationship
+          const isDocumentFile = file.entryName === documentLinksFile
+          const text = isDocumentFile
+            ? documentObject[Id]
+            : footnotesObject[Id]
+
+          if (!isEmptyString(Id) && !isEmptyString(Target) && !isEmptyString(text)) {
+            return {
+              id: Id,
+              location: isDocumentFile ? `document` : `footnotes`,
+              status: `UNPROCESSED`,
+              text,
+              url: Target,
+            }
           }
         }
         return null
-      })
-      .filter((hyperlink: Hyperlink | null) => (
-        hyperlink !== null
-      ))
+    }).filter((hyperlink: Hyperlink | null) => (hyperlink !== null))
 
     hyperlinks.push(...links)
   }
@@ -160,10 +184,84 @@ const getAllHyperlinks = async (
   return hyperlinks
 }
 
+const saveContentToFile = (zipFile: unzip, content, filePath: string): void => {
+  const xml = js2xml(content)
+  zipFile.addFile(filePath, Buffer.from(xml, `utf-8`))
+}
+
+const addArchivedLink = async (DOCXFile: DOCXFile, hyperlink: Hyperlink, url: string) => {
+  const { zipFile, zipEntries } = openZipFile(DOCXFile)
+
+  const { id, location } = hyperlink
+
+  const filePath = location === `document` ? documentTextFile : footnotesFile
+  const file = getFileInZip(zipEntries, filePath)
+  const fileContent = xml2js(zipFile.readAsText(file))
+
+  if (location === `document`) {
+    const elements = fileContent.elements[0].elements[0].elements
+    const elementIndex = elements.findIndex(element => {
+      if (element?.name === `w:p` && hasElements(element)) {
+        return element.elements.some(child => (child.name === `w:hyperlink` && child.attributes[`r:id`] === id))
+      }
+      return false
+    })
+    if (elementIndex === -1) {
+      console.log(`No such hyperlink ID`)
+      console.log(JSON.stringify(elements, null, 2))
+      return
+    }
+    const hyperlinkIndex = elements[elementIndex].elements.findIndex(({ name }) => name === `w:hyperlink`)
+    // TODO: insert footnote
+    // elements[elementIndex].elements = [
+    //   ...elements[elementIndex].elements.slice(0, hyperlinkIndex+1),
+    //   {
+    //     elements: [
+    //       {
+    //         attributes: { 'xml:space': `preserve` },
+    //         elements: [ { text: ` (archive)`, type: `text` } ],
+    //         name: `w:t`,
+    //         type: `element`,
+    //       },
+    //     ],
+    //     name: `w:r`,
+    //     type: `element`,
+    //   },
+    //   ...elements[elementIndex].elements.slice(hyperlinkIndex + 1),
+    // ]
+  } else if (location === `footnotes`) {}
+  
+  saveContentToFile(zipFile, fileContent, filePath)
+  await zipFile.writeZip(DOCXFile.tempPath)
+}
+
+const test = async () => {
+  const file = await readFile(`./playground/Test.docx`)
+  const hyperlink = {
+    id: `rId6`,
+    location: `document`,
+  } as Hyperlink
+  
+  // const { zipFile, zipEntries } = openZipFile(file)
+  // const documentXmlContent = zipFile.readAsText(
+  //   getFileInZip(zipEntries, documentTextFile),
+  // )
+  // return xml2js(documentXmlContent)
+
+  await addArchivedLink(file, hyperlink, `test`)
+
+  await closeFile(file)
+
+  // return getAllHyperlinks(file)
+}
+
 const DocumentConvert = {
+  addArchivedLink,
   closeFile,
   getAllHyperlinks,
   readFile,
+  saveContentToFile,
+  test,
 }
 
 export default DocumentConvert
