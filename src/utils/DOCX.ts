@@ -5,6 +5,28 @@ import { js2xml, xml2js } from 'xml-js'
 import crypto from 'crypto'
 import Logger from './Logger'
 
+const NODE = {
+  Relationship: { name: `Relationship`, type: `element` },
+  footnote: { name: `w:footnote`, type: `element` },
+  footnoteRef: { name: `w:footnoteRef`, type: `element` },
+  footnoteReference: { name: `w:footnoteReference`, type: `element` },
+  hyperlink: { name: `w:hyperlink`, type: `element` },
+  p: { name: `w:p`, type: `element` },
+  pPr: { name: `w:pPr`, type: `element` },
+  pStyle: { name: `w:pStyle`, type: `element` },
+  r: { name: `w:r`, type: `element` },
+  rPr: { name: `w:rPr`, type: `element` },
+  rStyle: { name: `w:rStyle`, type: `element` },
+  t: { name: `w:t`, type: `element` },
+  text: { type: `text` },
+} as const
+
+const ATTRIBUTES = {
+  footnoteReference: { 'w:val': `FootnoteReference` },
+  footnoteText: { 'w:val': `FootnoteText` },
+  spacePreserve: { 'xml:space': `preserve` },
+} as const
+
 const readFile = async (filePath: string): Promise<DOCXFile> => {
   const extension = path.extname(filePath)
   if (extension !== `.docx`) {
@@ -190,83 +212,166 @@ const saveContentToFile = (zipFile: unzip, content, filePath: string): void => {
 }
 
 const makeTextElement = (text: string) => ({
-  elements: [
-    {
-      attributes: { 'xml:space': `preserve` },
-      elements: [ { text, type: `text` } ],
-      name: `w:t`,
-      type: `element`,
-    },
-  ],
-  name: `w:r`,
-  type: `element`,
+  ...NODE.t,
+  elements: [ { ...NODE.text, text } ],
 })
+const makeRElementTextChild = (text: string) => ({
+  ...NODE.r,
+  elements: [makeTextElement(text)],
+})
+
 const makeHyperlinkRelationship = (id: string, url: string) => ({
+  ...NODE.Relationship,
   attributes: {
     Id: id,
     Target: url,
     TargetMode: `External`,
     Type: `http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink`,
   },
-  name: `Relationship`,
-  type: `element`,
 })
-const addHyperlinkRelationship = (footnotesFile, url: string) => {
-  const xmlContent = xml2js(footnotesFile)
-  let relationships = xmlContent.elements[0].elements
+
+// note that this mutates word/_rels/footnotes.xml.rels
+const addFootnoteHyperlinkRelationship = (
+  zipFile: unzip,
+  zipEntries: unzip.IZipEntry[],
+  url: string,
+) => {
+  const footnoteRelationshipFile = getFileInZip(
+    zipEntries,
+    footnotesLinksFile,
+  )
+  const footnoteRelationshipFileContents = zipFile.readAsText(
+    footnoteRelationshipFile,
+  )
+  const xmlContent = xml2js(footnoteRelationshipFileContents)
+  const relationships = xmlContent.elements[0].elements
   const allIds = relationships.map(relationship => (
     relationship?.attributes?.Id ? relationship.attributes.Id : null
   )).filter(relationship => relationship !== null)
   const newIdValue = Math.max(...allIds.map(id => Number.parseInt(id.slice(3)))) + 1
   const newId = `rId${newIdValue}`
-  relationships = [
+  xmlContent.elements[0].elements = [
     makeHyperlinkRelationship(newId, url),
     ...relationships,
   ]
-  return {
-    content: xmlContent,
-    id: newId,
-  }
+  saveContentToFile(
+    zipFile,
+    xmlContent,
+    footnotesLinksFile,
+  )
+  return newId
 }
+
 const makeHyperlinkElement = (id: string, text: string) => ({
+  ...NODE.hyperlink,
   attributes: {
     "r:id": id,
   },
   elements: [
     {
+      ...NODE.r,
       elements: [
         {
+          ...NODE.rPr,
           elements: [
             {
+              ...NODE.rStyle,
               attributes: {
                 "w:val": `Hyperlink`,
               },
-              name: `w:rStyle`,
-              type: `element`,
             },
           ],
-          name: `w:rPr`,
-          type: `element`,
         },
-        {
-          elements: [
-            {
-              text: text,
-              type: `text`,
-            },
-          ],
-          name: `w:t`,
-          type: `element`,
-        },
+        makeTextElement(text),
       ],
-      name: `w:r`,
-      type: `element`,
     },
   ],
-  name: `w:hyperlink`,
-  type: `element`,
 })
 
+const randomParaId = (): string => crypto.randomBytes(4).toString(`hex`).toUpperCase()
+
+// the footnote in the footnotes.xml file
+const makeFootnote = (footnoteId: string, content: any[]) => ({
+  ...NODE.footnote,
+  attributes: {
+    'w:id': footnoteId,
+  },
+  elements: [
+    {
+      ...NODE.p,
+      elements: [
+        {
+          ...NODE.pPr,
+          elements: [
+            { ...NODE.pStyle, attributes: { ...ATTRIBUTES.footnoteText } },
+          ],
+        },
+        {
+          ...NODE.r,
+          elements: [
+            {
+              ...NODE.rPr,
+              elements: [
+                { ...NODE.rStyle, attributes: { ...ATTRIBUTES.footnoteReference } },
+              ],
+            },
+            { ...NODE.footnoteRef },
+          ],
+        },
+        {
+          ...NODE.r,
+          elements: [
+            { ...NODE.t, attributes: { ...ATTRIBUTES.spacePreserve } },
+          ],
+        },
+        ...content,
+      ],
+    },
+  ],
+})
+
+// the referece in the document.xml file
+const makeFootnoteReference = (footnoteId: string) => ({
+  ...NODE.r,
+  elements: [
+    {
+      ...NODE.rPr,
+      elements: [
+        { ...NODE.rStyle, attributes: { ...ATTRIBUTES.footnoteReference } },
+      ],
+    },
+    { ...NODE.footnoteReference, attributes: { 'w:id': footnoteId } },
+  ],
+})
+
+// note that this mutates word/footnotes.xml
+const addFootnoteRelationship = (
+  zipFile: unzip,
+  zipEntries: unzip.IZipEntry[],
+  content: any[],
+): string => {
+  const footnoteFileContents = zipFile.readAsText(
+    getFileInZip(zipEntries, footnotesFile),
+  )
+  const xmlContent = xml2js(footnoteFileContents)
+  const footnotes = xmlContent.elements[0].elements
+  const allIds = footnotes.map(footnote => (
+    footnote?.attributes[`w:id`] ? footnote.attributes[`w:id`] : null
+  )).filter(footnote => footnote !== null)
+  const newId = Math.max(...allIds.map(id => Number.parseInt(id))) + 1
+  xmlContent.elements[0].elements = [
+    ...footnotes,
+    makeFootnote(`${newId}`, content),
+  ]
+  saveContentToFile(
+    zipFile,
+    xmlContent,
+    footnotesFile,
+  )
+  return `${newId}`
+}
+
+// TODO: make addArchivedLink idempotent
 const addArchivedLink = async (DOCXFile: DOCXFile, hyperlink: Hyperlink, url: string) => {
   const { zipFile, zipEntries } = openZipFile(DOCXFile)
 
@@ -290,23 +395,20 @@ const addArchivedLink = async (DOCXFile: DOCXFile, hyperlink: Hyperlink, url: st
       return
     }
     const hyperlinkIndex = elements[elementIndex].elements.findIndex(({ name }) => name === `w:hyperlink`)
-    // TODO: insert footnote
-    // elements[elementIndex].elements = [
-    //   ...elements[elementIndex].elements.slice(0, hyperlinkIndex+1),
-    //   {
-    //     elements: [
-    //       {
-    //         attributes: { 'xml:space': `preserve` },
-    //         elements: [ { text: ` (archive)`, type: `text` } ],
-    //         name: `w:t`,
-    //         type: `element`,
-    //       },
-    //     ],
-    //     name: `w:r`,
-    //     type: `element`,
-    //   },
-    //   ...elements[elementIndex].elements.slice(hyperlinkIndex + 1),
-    // ]
+    const hyperlinkId = addFootnoteHyperlinkRelationship(zipFile, zipEntries, url)
+    const footnoteContent = [
+      makeHyperlinkElement(hyperlinkId, `[archive]`),
+    ]
+    const footnoteId = addFootnoteRelationship(
+      zipFile,
+      zipEntries,
+      footnoteContent,
+    )
+    elements[elementIndex].elements = [
+      ...elements[elementIndex].elements.slice(0, hyperlinkIndex + 1),
+      makeFootnoteReference(footnoteId),
+      ...elements[elementIndex].elements.slice(hyperlinkIndex + 1),
+    ]
   } else if (location === `footnotes`) {
     const elements = fileContent.elements[0].elements
     for (const footnote of elements) {
@@ -315,29 +417,15 @@ const addArchivedLink = async (DOCXFile: DOCXFile, hyperlink: Hyperlink, url: st
           if (paragraph?.name === `w:p` && hasElements(paragraph)) {
             for (const [childIndex, child] of paragraph.elements.entries()) {
               if (child?.name === `w:hyperlink` && child?.attributes[`r:id`] === id) {
-                const footnoteRelationshipFile = getFileInZip(
-                  zipEntries,
-                  footnotesLinksFile,
-                )
-                const footnoteRelationshipFileContents = zipFile.readAsText(
-                  footnoteRelationshipFile,
-                )
-                const {
-                  id: hyperlinkId,
-                  content: updatedContent,
-                } = addHyperlinkRelationship(
-                  footnoteRelationshipFileContents,
-                  url,
-                )
-                saveContentToFile(
+                const hyperlinkId = addFootnoteHyperlinkRelationship(
                   zipFile,
-                  updatedContent,
-                  footnotesLinksFile,
+                  zipEntries,
+                  url,
                 )
                 
                 paragraph.elements = [
                   ...paragraph.elements.slice(0, childIndex + 1),
-                  makeTextElement(` `),
+                  makeRElementTextChild(` `),
                   makeHyperlinkElement(hyperlinkId, `[archive]`),
                   ...paragraph.elements.slice(childIndex + 1),
                 ]
@@ -356,8 +444,8 @@ const addArchivedLink = async (DOCXFile: DOCXFile, hyperlink: Hyperlink, url: st
 const test = async () => {
   const file = await readFile(`./playground/Test.docx`)
   const hyperlink = {
-    id: `rId1`,
-    location: `footnotes`,
+    id: `rId6`,
+    location: `document`,
   } as Hyperlink
   
   // const { zipFile, zipEntries } = openZipFile(file)
