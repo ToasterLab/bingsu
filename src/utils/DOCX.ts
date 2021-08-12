@@ -189,6 +189,84 @@ const saveContentToFile = (zipFile: unzip, content, filePath: string): void => {
   zipFile.addFile(filePath, Buffer.from(xml, `utf-8`))
 }
 
+const makeTextElement = (text: string) => ({
+  elements: [
+    {
+      attributes: { 'xml:space': `preserve` },
+      elements: [ { text, type: `text` } ],
+      name: `w:t`,
+      type: `element`,
+    },
+  ],
+  name: `w:r`,
+  type: `element`,
+})
+const makeHyperlinkRelationship = (id: string, url: string) => ({
+  attributes: {
+    Id: id,
+    Target: url,
+    TargetMode: `External`,
+    Type: `http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink`,
+  },
+  name: `Relationship`,
+  type: `element`,
+})
+const addHyperlinkRelationship = (footnotesFile, url: string) => {
+  const xmlContent = xml2js(footnotesFile)
+  let relationships = xmlContent.elements[0].elements
+  const allIds = relationships.map(relationship => (
+    relationship?.attributes?.Id ? relationship.attributes.Id : null
+  )).filter(relationship => relationship !== null)
+  const newIdValue = Math.max(...allIds.map(id => Number.parseInt(id.slice(3)))) + 1
+  const newId = `rId${newIdValue}`
+  relationships = [
+    makeHyperlinkRelationship(newId, url),
+    ...relationships,
+  ]
+  return {
+    content: xmlContent,
+    id: newId,
+  }
+}
+const makeHyperlinkElement = (id: string, text: string) => ({
+  attributes: {
+    "r:id": id,
+  },
+  elements: [
+    {
+      elements: [
+        {
+          elements: [
+            {
+              attributes: {
+                "w:val": `Hyperlink`,
+              },
+              name: `w:rStyle`,
+              type: `element`,
+            },
+          ],
+          name: `w:rPr`,
+          type: `element`,
+        },
+        {
+          elements: [
+            {
+              text: text,
+              type: `text`,
+            },
+          ],
+          name: `w:t`,
+          type: `element`,
+        },
+      ],
+      name: `w:r`,
+      type: `element`,
+    },
+  ],
+  name: `w:hyperlink`,
+  type: `element`,
+})
+
 const addArchivedLink = async (DOCXFile: DOCXFile, hyperlink: Hyperlink, url: string) => {
   const { zipFile, zipEntries } = openZipFile(DOCXFile)
 
@@ -229,7 +307,47 @@ const addArchivedLink = async (DOCXFile: DOCXFile, hyperlink: Hyperlink, url: st
     //   },
     //   ...elements[elementIndex].elements.slice(hyperlinkIndex + 1),
     // ]
-  } else if (location === `footnotes`) {}
+  } else if (location === `footnotes`) {
+    const elements = fileContent.elements[0].elements
+    for (const footnote of elements) {
+      if (footnote?.name === `w:footnote` && hasElements(footnote)) {
+        for (const paragraph of footnote.elements) {
+          if (paragraph?.name === `w:p` && hasElements(paragraph)) {
+            for (const [childIndex, child] of paragraph.elements.entries()) {
+              if (child?.name === `w:hyperlink` && child?.attributes[`r:id`] === id) {
+                const footnoteRelationshipFile = getFileInZip(
+                  zipEntries,
+                  footnotesLinksFile,
+                )
+                const footnoteRelationshipFileContents = zipFile.readAsText(
+                  footnoteRelationshipFile,
+                )
+                const {
+                  id: hyperlinkId,
+                  content: updatedContent,
+                } = addHyperlinkRelationship(
+                  footnoteRelationshipFileContents,
+                  url,
+                )
+                saveContentToFile(
+                  zipFile,
+                  updatedContent,
+                  footnotesLinksFile,
+                )
+                
+                paragraph.elements = [
+                  ...paragraph.elements.slice(0, childIndex + 1),
+                  makeTextElement(` `),
+                  makeHyperlinkElement(hyperlinkId, `[archive]`),
+                  ...paragraph.elements.slice(childIndex + 1),
+                ]
+              } 
+            }
+          }
+        }
+      }
+    }
+  }
   
   saveContentToFile(zipFile, fileContent, filePath)
   await zipFile.writeZip(DOCXFile.tempPath)
@@ -238,8 +356,8 @@ const addArchivedLink = async (DOCXFile: DOCXFile, hyperlink: Hyperlink, url: st
 const test = async () => {
   const file = await readFile(`./playground/Test.docx`)
   const hyperlink = {
-    id: `rId6`,
-    location: `document`,
+    id: `rId1`,
+    location: `footnotes`,
   } as Hyperlink
   
   // const { zipFile, zipEntries } = openZipFile(file)
@@ -248,7 +366,7 @@ const test = async () => {
   // )
   // return xml2js(documentXmlContent)
 
-  await addArchivedLink(file, hyperlink, `test`)
+  await addArchivedLink(file, hyperlink, `https://example.org`)
 
   await closeFile(file)
 
