@@ -4,6 +4,7 @@ import unzip from 'adm-zip'
 import { js2xml, xml2js } from 'xml-js'
 import crypto from 'crypto'
 import Logger from './Logger'
+import { isArchiveLink } from './Utils'
 
 const NODE = {
   Relationship: { name: `Relationship`, type: `element` },
@@ -343,6 +344,16 @@ const makeFootnoteReference = (footnoteId: string) => ({
     { ...NODE.footnoteReference, attributes: { 'w:id': footnoteId } },
   ],
 })
+const getFootnoteId = (element): number => {
+  if (element.name === NODE.r.name && hasElements(element)) {
+    const lastElement = element.elements[element.elements.length - 1]
+    if (lastElement.name === NODE.footnoteReference.name &&
+      `attributes` in lastElement && `w:id` in lastElement.attributes) {
+      return Number(lastElement.attributes[`w:id`])
+    }
+  }
+  return -1
+}
 
 // note that this mutates word/footnotes.xml
 const addFootnoteRelationship = (
@@ -371,6 +382,28 @@ const addFootnoteRelationship = (
   return `${newId}`
 }
 
+const updateFootnoteRelationship = (
+  zipFile: unzip,
+  zipEntries: unzip.IZipEntry[],
+  footnoteId: string,
+  content: any[],
+) => {
+  const footnoteFileContents = zipFile.readAsText(
+    getFileInZip(zipEntries, footnotesFile),
+  )
+  const xmlContent = xml2js(footnoteFileContents)
+  const footnotes = xmlContent.elements[0].elements
+  const footnoteIndex = footnotes.findIndex(element => {
+    if (element.name === NODE.footnote.name && `attributes` in element &&
+      hasElements(element)) {
+      // check ID
+    }
+  })
+  xmlContent.elements[0].elements = [
+    ...footnotes,
+  ]
+}
+
 // TODO: make addArchivedLink idempotent
 const addArchivedLink = async (DOCXFile: DOCXFile, hyperlink: Hyperlink, url: string) => {
   const { zipFile, zipEntries } = openZipFile(DOCXFile)
@@ -384,8 +417,8 @@ const addArchivedLink = async (DOCXFile: DOCXFile, hyperlink: Hyperlink, url: st
   if (location === `document`) {
     const elements = fileContent.elements[0].elements[0].elements
     const elementIndex = elements.findIndex(element => {
-      if (element?.name === `w:p` && hasElements(element)) {
-        return element.elements.some(child => (child.name === `w:hyperlink` && child.attributes[`r:id`] === id))
+      if (element?.name === NODE.p.name && hasElements(element)) {
+        return element.elements.some(child => (child.name === NODE.hyperlink.name && child.attributes[`r:id`] === id))
       }
       return false
     })
@@ -394,7 +427,19 @@ const addArchivedLink = async (DOCXFile: DOCXFile, hyperlink: Hyperlink, url: st
       console.log(JSON.stringify(elements, null, 2))
       return
     }
-    const hyperlinkIndex = elements[elementIndex].elements.findIndex(({ name }) => name === `w:hyperlink`)
+    const hyperlinkIndex = elements[elementIndex].elements.findIndex(({ name }) => name === NODE.hyperlink.name)
+    
+    const existingFootnoteReference = [
+      ...elements[elementIndex].elements.slice(hyperlinkIndex + 1, hyperlinkIndex + 2),
+    ]
+    if (existingFootnoteReference.length === 1) {
+      const footnoteId = getFootnoteId(existingFootnoteReference[0])
+      if (footnoteId !== -1) {
+        // just update the footnote
+        updateFootnoteRelationship(zipFile, zipEntries, `${footnoteId}`, [])
+        return
+      }
+    }
     const hyperlinkId = addFootnoteHyperlinkRelationship(zipFile, zipEntries, url)
     const footnoteContent = [
       makeHyperlinkElement(hyperlinkId, `[archive]`),
@@ -422,13 +467,18 @@ const addArchivedLink = async (DOCXFile: DOCXFile, hyperlink: Hyperlink, url: st
                   zipEntries,
                   url,
                 )
-                
-                paragraph.elements = [
-                  ...paragraph.elements.slice(0, childIndex + 1),
-                  makeRElementTextChild(` `),
-                  makeHyperlinkElement(hyperlinkId, `[archive]`),
-                  ...paragraph.elements.slice(childIndex + 1),
-                ]
+
+                const existingHyperlink = [...paragraph.elements.slice(childIndex + 2, childIndex + 3)]
+                if (existingHyperlink.length === 1 && existingHyperlink[0].name === `w:hyperlink` && assembleHyperlinkText(existingHyperlink[0]) === `[archive]`) {
+                  // exists, so do nothing
+                } else {
+                  paragraph.elements = [
+                    ...paragraph.elements.slice(0, childIndex + 1),
+                    makeRElementTextChild(` `),
+                    makeHyperlinkElement(hyperlinkId, `[archive]`),
+                    ...paragraph.elements.slice(childIndex + 1),
+                  ]
+                }
               } 
             }
           }
